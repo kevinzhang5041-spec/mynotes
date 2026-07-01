@@ -1,0 +1,1 @@
+Conductors can be used to form [[Capacitance|capacitors]].  All field lines are perpendicular to surfaces of conductors

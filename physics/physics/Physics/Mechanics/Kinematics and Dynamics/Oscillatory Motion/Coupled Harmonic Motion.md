@@ -1,0 +1,1 @@
+When given two $F=ma$ equations, take the sum and differences of each equations, re-expressing them in terms of the coordinates, and fiddling around to solve them.

@@ -1,0 +1,2 @@
+An invariant remains constant under all operations. This can be conditions (something can be expressed this way), a summation/product, or coloration.
+A semi-invariant is a quantity that, although not constant under a specific transformation, keeps increasing (or decreasing). As such it provides a unidirectional obstruction.

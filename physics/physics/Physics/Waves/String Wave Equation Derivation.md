@@ -1,0 +1,4 @@
+
+![[Pasted image 20240806133141.png]]
+There is no net force in the x direction because this elemental strip does not accelerate in the x direction (oscillations only occur in the y direction).
+The net force in the y direction is $$\begin{align*} F_y &= F \sin \theta_2 - F \sin \theta_1 \\ &\approx F (\tan \theta_2 - \tan \theta_1) \\ &= F \delta(\tan \theta). \end{align*}$$ Then, since the mass of the elemental strip is $dm = \mu dx$, we get $$F \delta(\tan \theta) = \mu dx \frac{\delta^2 y}{\delta t^2}.$$ Substituting $\tan \theta = \frac{\delta y}{\delta x}$ and rearranging, we obtain the wave equation $$\boxed{\frac{\delta^2 y}{\delta x^2} = \frac{1}{v^2} \frac{\delta^2 y}{\delta t^2}},$$ where $v = \sqrt{\frac{F}{\mu}}$.

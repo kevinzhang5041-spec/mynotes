@@ -1,0 +1,1 @@
+If curl is 0 then force is conservative.

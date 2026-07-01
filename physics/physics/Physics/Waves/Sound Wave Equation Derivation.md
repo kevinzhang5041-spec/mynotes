@@ -1,0 +1,6 @@
+Let $x$ denote the displacement and $S(x, t)$ denote the displacement of a certain point on a sound wave, both relative to the origin. We have the difference in pressures on an elemental strip is $P(x+dx)-P(x)$, so $$P(x+dx)-P(x) = \rho A dx \frac{1}{A} \frac{\delta^2 S}{\delta t^2}.$$Note that by definition, $dP = - \beta \frac{dV}{V}$, where $\beta$ is the bulk modulus of the medium. Then, $$dP = - \beta \frac{A[S(x+dx)-S(x)]}{A dx} = - \beta \frac{\delta S}{\delta x}.$$Therefore, since $dP = P_0 + P(x) - P_0$, we get $P(x) = - \beta \frac{\delta S}{\delta x}$. Substituting this into the first equation and rearranging, we obtain $$\frac{\delta^2 S}{\delta x^2} = \frac{1}{v^2} \frac{\delta^2 S}{\delta t^2},$$ where $v = \sqrt{\frac{\beta}{\rho}}$.
+
+
+
+**Sound Wave Speed in Air**
+The process of sound wave propagation in air can be considered adiabatic (moves too fast to transfer heat). Therefore, we have $$\beta = - V \frac{dP}{dV} \ \text{ and } \ PV^{\gamma} = \text{const.}$$Differentiating the second equation leads to $dP V^{\gamma} + \gamma dV P V^{\gamma-1} = 0$, or $dP + P \gamma \frac{dV}{V} = 0 \implies - V \frac{dP}{dV} = P \gamma = \beta$. Therefore, $$\frac{\beta}{\rho} = P \gamma = \frac{nRT}{\rho V} \gamma = \frac{\gamma RT}{M},$$ where $M$ is the molar mass of the gas. Solving for $v$, we see $v = \sqrt{\frac{\gamma RT}{M}}$.

@@ -1,0 +1,1 @@
+$f^N(x)$ as $N \rightarrow \infty$, is equal to $y$ where $f(y)=y$. 

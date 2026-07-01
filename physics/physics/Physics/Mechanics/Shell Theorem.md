@@ -1,0 +1,1 @@
+As a result of [[Newton's Laws]], a spherical shell has no effect on any mass inside of it, and can be viewed as a single mass point at its center from the outside. Applications of a gravitational equivalent of [[Gauss's Law]] can be useful.

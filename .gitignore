@@ -1,0 +1,22 @@
+# Obsidian application state -- not part of the notes themselves.
+# (Contains cached workspace layouts and bundled plugin JS; large and irrelevant to the site.)
+physics/physics/.obsidian/
+
+# Obsidian "Bases" plugin database files -- not notes.
+physics/physics/*.base
+
+# Course PDFs / textbooks. Never publish these: several are copyrighted
+# (including a textbook copy) and none of them are used by the site anyway
+# (the build only reads .md files).
+*.pdf
+
+# Old local backup archive of the vault -- not needed in the repo.
+physics.zip
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Local preview server config (machine-specific ports)
+.claude/launch.json
