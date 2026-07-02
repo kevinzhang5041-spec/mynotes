@@ -193,6 +193,143 @@ def stage_of(wc):
 
 
 # ---------------------------------------------------------------------------
+# 3.5 Excalidraw rendering: the Obsidian Excalidraw plugin stores each drawing
+#     as plain scene JSON inside a ```json fence. We render the element types
+#     that actually occur in this vault (freedraw, line, arrow, rectangle,
+#     ellipse, text) to a standalone SVG string. Pure-black strokes become
+#     currentColor so the site's ink color applies; user-chosen colors stay.
+# ---------------------------------------------------------------------------
+JSON_BLOCK_RE = re.compile(r"```json\n(.*?)\n```", re.S)
+INK_COLORS = {"#000000", "#000", "#1e1e1e", "black"}
+XD_TYPES = {"freedraw", "line", "arrow", "rectangle", "ellipse", "text"}
+
+
+def xd_scene(raw_text):
+    m = JSON_BLOCK_RE.search(raw_text)
+    if not m:
+        return None
+    try:
+        return json.loads(m.group(1))
+    except ValueError:
+        return None
+
+
+def xd_num(v):
+    s = f"{v:.1f}"
+    return s[:-2] if s.endswith(".0") else s
+
+
+def xd_color(c):
+    if not c or c == "transparent":
+        return None
+    return "currentColor" if c.lower() in INK_COLORS else c
+
+
+def xd_escape(s):
+    return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def xd_points(e):
+    """Absolute coordinates for point-based elements."""
+    return [(e["x"] + p[0], e["y"] + p[1]) for p in e.get("points", [])]
+
+
+def xd_path(pts):
+    d = f"M {xd_num(pts[0][0])} {xd_num(pts[0][1])}"
+    for x, y in pts[1:]:
+        d += f" L {xd_num(x)} {xd_num(y)}"
+    return d
+
+
+def xd_render_element(e):
+    import math as _m
+    kind = e.get("type")
+    stroke = xd_color(e.get("strokeColor")) or "currentColor"
+    sw = (e.get("strokeWidth") or 1) * 1.25
+    rot = ""
+    if e.get("angle"):
+        cx = e["x"] + e.get("width", 0) / 2
+        cy = e["y"] + e.get("height", 0) / 2
+        rot = f' transform="rotate({xd_num(_m.degrees(e["angle"]))} {xd_num(cx)} {xd_num(cy)})"'
+    line_attrs = (f'stroke="{stroke}" stroke-width="{sw:.2f}" fill="none" '
+                  f'stroke-linecap="round" stroke-linejoin="round"')
+
+    if kind == "freedraw":
+        pts = xd_points(e)
+        if len(pts) < 2:
+            return ""
+        return f'<path d="{xd_path(pts)}" {line_attrs}{rot}/>'
+
+    if kind in ("line", "arrow"):
+        pts = xd_points(e)
+        if len(pts) < 2:
+            return ""
+        out = f'<path d="{xd_path(pts)}" {line_attrs}{rot}/>'
+        if kind == "arrow":
+            (x0, y0), (x1, y1) = pts[-2], pts[-1]
+            ang = _m.atan2(y1 - y0, x1 - x0)
+            seg = _m.hypot(x1 - x0, y1 - y0) or 1
+            hl = min(14, seg * 0.7)
+            for da in (2.6, -2.6):
+                hx, hy = x1 + hl * _m.cos(ang + da), y1 + hl * _m.sin(ang + da)
+                out += (f'<path d="M {xd_num(x1)} {xd_num(y1)} L {xd_num(hx)} {xd_num(hy)}" '
+                        f'{line_attrs}{rot}/>')
+        return out
+
+    fill = xd_color(e.get("backgroundColor"))
+    fill_attr = (f'fill="{fill}" fill-opacity="{"1" if e.get("fillStyle") == "solid" else "0.25"}"'
+                 if fill else 'fill="none"')
+
+    if kind == "rectangle":
+        rx = ' rx="8"' if e.get("roundness") else ""
+        return (f'<rect x="{xd_num(e["x"])}" y="{xd_num(e["y"])}" width="{xd_num(e["width"])}" '
+                f'height="{xd_num(e["height"])}"{rx} stroke="{stroke}" stroke-width="{sw:.2f}" '
+                f'{fill_attr}{rot}/>')
+
+    if kind == "ellipse":
+        return (f'<ellipse cx="{xd_num(e["x"] + e["width"] / 2)}" cy="{xd_num(e["y"] + e["height"] / 2)}" '
+                f'rx="{xd_num(e["width"] / 2)}" ry="{xd_num(e["height"] / 2)}" '
+                f'stroke="{stroke}" stroke-width="{sw:.2f}" {fill_attr}{rot}/>')
+
+    if kind == "text":
+        fs = e.get("fontSize", 20)
+        lines = (e.get("text") or "").split("\n")
+        spans = "".join(
+            f'<tspan x="{xd_num(e["x"])}" y="{xd_num(e["y"] + fs * 0.8 + i * fs * 1.25)}">{xd_escape(ln)}</tspan>'
+            for i, ln in enumerate(lines)
+        )
+        return (f'<text font-size="{xd_num(fs)}" fill="{stroke}" '
+                f'font-family="Segoe Print, Comic Sans MS, cursive"{rot}>{spans}</text>')
+
+    return ""
+
+
+def xd_render_svg(scene):
+    els = [e for e in scene.get("elements", [])
+           if not e.get("isDeleted") and e.get("type") in XD_TYPES]
+    if not els:
+        return None
+    minx = miny = float("inf")
+    maxx = maxy = float("-inf")
+    for e in els:
+        if e.get("points"):
+            xs = [p[0] for p in xd_points(e)]
+            ys = [p[1] for p in xd_points(e)]
+            minx, maxx = min(minx, *xs), max(maxx, *xs)
+            miny, maxy = min(miny, *ys), max(maxy, *ys)
+        else:
+            minx = min(minx, e["x"])
+            miny = min(miny, e["y"])
+            maxx = max(maxx, e["x"] + e.get("width", 0))
+            maxy = max(maxy, e["y"] + e.get("height", 0))
+    pad = 24
+    w, h = (maxx - minx) + 2 * pad, (maxy - miny) + 2 * pad
+    body = "".join(xd_render_element(e) for e in els)
+    return (f'<svg class="xd-svg" viewBox="{xd_num(minx - pad)} {xd_num(miny - pad)} '
+            f'{xd_num(w)} {xd_num(h)}" xmlns="http://www.w3.org/2000/svg">{body}</svg>')
+
+
+# ---------------------------------------------------------------------------
 # 4. Build note/log objects
 # ---------------------------------------------------------------------------
 notes = {}
@@ -200,7 +337,11 @@ sketches = {}
 
 for r in records:
     if r["kind"] == "sketch":
-        sketches[r["id"]] = {"id": r["id"], "title": r["title"], "relDir": r["relDir"]}
+        with open(r["full"], "r", encoding="utf-8") as f:
+            raw = f.read()
+        scene = xd_scene(raw)
+        svg = xd_render_svg(scene) if scene else None
+        sketches[r["id"]] = {"id": r["id"], "title": r["title"], "relDir": r["relDir"], "svg": svg}
         continue
     with open(r["full"], "r", encoding="utf-8") as f:
         raw = f.read()
@@ -494,6 +635,7 @@ data = {
     "meta": {
         "noteCount": note_count,
         "sketchCount": len(sketches),
+        "drawnCount": sum(1 for s in sketches.values() if s["svg"]),
         "linkCount": link_count,
         "suggestedCount": suggested_count,
         "missingCount": missing_count,

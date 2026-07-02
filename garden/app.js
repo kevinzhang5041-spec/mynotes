@@ -136,7 +136,7 @@ function renderLink(link) {
           <div class="ec-icon">${pencilIcon()}</div>
           <div><div class="ec-title">${escapeHtml(sk.title)}</div><div class="ec-sub">hand-drawn diagram &middot; open sketch</div></div>
         </div>
-        ${sketchSvg(sk.id)}
+        ${sk.svg ? `<div class="xd-embed">${sk.svg}</div>` : sketchSvg(sk.id)}
       </a>`;
     }
     return `<a class="wl" href="${sketchHref(link.resolvedId)}">${label} ✏️</a>`;
@@ -198,18 +198,18 @@ function renderSidebar() {
   nav.innerHTML = "";
 
   const secPhysics = document.createElement("div");
-  secPhysics.innerHTML = `<div class="nt-section-title">Physics</div>`;
+  secPhysics.innerHTML = `<div class="nt-section-title st-yellow">Physics</div>`;
   nav.appendChild(secPhysics);
   buildTreeDom(DATA.tree.Physics, nav, "Physics");
 
   const secMath = document.createElement("div");
-  secMath.innerHTML = `<div class="nt-section-title">Math</div>`;
+  secMath.innerHTML = `<div class="nt-section-title st-coral">Math</div>`;
   nav.appendChild(secMath);
   buildTreeDom(DATA.tree.Math, nav, "Math");
 
   if (DATA.logs.length) {
     const secLog = document.createElement("div");
-    secLog.innerHTML = `<div class="nt-section-title">Study Log</div>`;
+    secLog.innerHTML = `<div class="nt-section-title st-mint">Study Log</div>`;
     nav.appendChild(secLog);
     DATA.logs.forEach((l) => {
       const a = document.createElement("a");
@@ -222,7 +222,7 @@ function renderSidebar() {
   }
 
   const secSketch = document.createElement("div");
-  secSketch.innerHTML = `<div class="nt-section-title">Sketches</div>`;
+  secSketch.innerHTML = `<div class="nt-section-title st-pink">Sketches</div>`;
   nav.appendChild(secSketch);
   const skLink = document.createElement("a");
   skLink.className = "nt-file";
@@ -582,10 +582,12 @@ function renderHome() {
   btn3d.addEventListener("click", show3D);
   btn2d.addEventListener("click", show2D);
 
-  requestAnimationFrame(() => {
+  // setTimeout, not requestAnimationFrame: rAF never fires in hidden tabs,
+  // which would leave the garden blank until the tab regains focus.
+  setTimeout(() => {
     if (typeof ForceGraph3D === "function") show3D();
     else { btn3d.style.display = "none"; show2D(); }
-  });
+  }, 0);
   markCurrent(null);
 }
 
@@ -622,18 +624,19 @@ function renderCategory(top, name) {
 
 function renderSketches() {
   document.title = "sketches — my notes";
-  const list = Object.values(DATA.sketches).sort((a, b) => a.title.localeCompare(b.title));
+  const list = Object.values(DATA.sketches)
+    .sort((a, b) => (!!b.svg - !!a.svg) || a.title.localeCompare(b.title));
   $view.innerHTML = `
     <div class="crumbs"><a href="#/">garden</a><span class="sep">/</span>sketches</div>
     <h1 class="note-title" style="margin-bottom:8px;">Hand-drawn sketches</h1>
-    <p class="home-sub" style="margin-bottom:26px;">${list.length} Excalidraw canvases live in the vault. They're
-      referenced from the notes below but rendered here as stylized placeholders — open the original in
-      Obsidian to see the real ink.</p>
+    <p class="home-sub" style="margin-bottom:26px;">${list.length} Excalidraw canvases live in the vault —
+      ${DATA.meta.drawnCount} of them are rendered here as real ink, straight from the drawing data.
+      The empty ones show a placeholder squiggle until they get drawn.</p>
     <div class="sketch-grid">
       ${list.map((s) => `
         <a class="sketch-tile" href="${sketchHref(s.id)}">
-          ${sketchSvg(s.id, 200, 70)}
-          <div class="st-title">${escapeHtml(s.title)}</div>
+          ${s.svg ? `<div class="xd-thumb">${s.svg}</div>` : sketchSvg(s.id, 200, 70)}
+          <div class="st-title">${s.svg ? "✏️ " : ""}${escapeHtml(s.title)}</div>
         </a>`).join("")}
     </div>
   `;
@@ -648,12 +651,13 @@ function renderSketch(id) {
   $view.innerHTML = `
     <div class="crumbs"><a href="#/">garden</a><span class="sep">/</span><a href="#/sketches">sketches</a><span class="sep">/</span>${escapeHtml(sk.title)}</div>
     <h1 class="note-title">${escapeHtml(sk.title)}</h1>
+    ${sk.svg ? `<div class="xd-page">${sk.svg}</div>` : `
     <div class="embed-card" style="margin-top:22px;">
       <div class="ec-row"><div class="ec-icon">${pencilIcon()}</div>
-        <div><div class="ec-title">Hand-drawn diagram</div><div class="ec-sub">${sk.relDir}</div></div>
+        <div><div class="ec-title">Nothing drawn on this canvas yet</div><div class="ec-sub">${sk.relDir}</div></div>
       </div>
       ${sketchSvg(sk.id, 700, 220)}
-    </div>
+    </div>`}
     <div class="connections">
       <div class="conn-group">
         <h5><span class="dot" style="background:var(--blue)"></span>referenced from</h5>
@@ -724,13 +728,13 @@ function renderNote(id) {
     <div class="crumbs">${crumbs}${crumbs ? '<span class="sep">/</span>' : ""}${escapeHtml(note.title)}</div>
     <div class="note-head">
       <h1 class="note-title">${escapeHtml(note.title)}</h1>
-      <span class="stage-badge">${meta.icon} ${meta.label}</span>
+      <span class="stage-badge stage-badge-${note.stage}">${meta.icon} ${meta.label}</span>
     </div>
     <div class="note-body">${bodyHtml}</div>
     ${note.kind === "note" ? `
     <div class="connections">
-      ${connGroup("links to", "var(--blue)", outgoingIds)}
-      ${connGroup("linked from", "var(--red)", note.backlinks)}
+      ${connGroup("links to", "var(--blue)", outgoingIds, "out")}
+      ${connGroup("linked from", "var(--red)", note.backlinks, "in")}
       ${connGroup("you might also like", "var(--green)", note.suggested, "suggested")}
       ${siblings.length ? connGroup("nearby on this branch", "var(--yellow)", siblings, "sibling") : ""}
     </div>
@@ -744,7 +748,7 @@ function renderNote(id) {
 
   if (note.kind === "note" && (outgoingIds.length + note.backlinks.length + note.suggested.length) > 0) {
     const egoIds = new Set([note.id, ...outgoingIds, ...note.backlinks, ...note.suggested]);
-    requestAnimationFrame(() => renderGraph(document.getElementById("egoSvg"), buildGraphData(egoIds), { big: false, charge: -220 }));
+    setTimeout(() => renderGraph(document.getElementById("egoSvg"), buildGraphData(egoIds), { big: false, charge: -220 }), 0);
   }
 
   markCurrent(id);
