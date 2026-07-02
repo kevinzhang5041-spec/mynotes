@@ -1,5 +1,5 @@
 
-For a linear recurrence with constant coefficients
+For a [[Linear Recursive Sequence|linear recurrence]] with constant coefficients
 
 $$  
 a_{n+k}=c_1a_{n+k-1}+c_2a_{n+k-2}+\cdots+c_ka_n,  
@@ -17,7 +17,7 @@ $$
 r^{n+k}=c_1r^{n+k-1}+c_2r^{n+k-2}+\cdots+c_kr^n.  
 $$
 
-Divide both sides by $$r^n$$ (assuming $$r\neq0$$):
+Divide both sides by $$r^n$$ (assuming $r\neq0$):
 
 $$  
 r^k=c_1r^{k-1}+c_2r^{k-2}+\cdots+c_k.  
@@ -59,7 +59,7 @@ $$
 r^{n+2}=4r^{n+1}+r^n.  
 $$
 
-Divide by $$r^n$$:
+Divide by $r^n$:
 
 $$  
 r^2=4r+1.  
@@ -83,4 +83,4 @@ $$
 a_n=A(2+\sqrt5)^n+B(2-\sqrt5)^n.  
 $$
 
-Use the initial conditions to solve for $$A$$ and $$B.$$
+Use the initial conditions to solve for $A$ and $B.$

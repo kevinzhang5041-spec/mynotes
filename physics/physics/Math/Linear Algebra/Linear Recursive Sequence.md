@@ -1,4 +1,3 @@
-**Definition**  
 A $k$th-order linear recurrence with constant coefficients has the form 
 
 $$  
@@ -93,7 +92,7 @@ $$
 \det(A - \lambda I) = 0  
 $$
 
-This becomes the **[[Characteristic Equations|characteristic polynomial]]** of the recurrence.
+This becomes the **[[Characteristic Equation|characteristic polynomial]]** of the recurrence.
 
 ---
 
@@ -137,7 +136,7 @@ $$
 (\text{polynomial in } n)\cdot(\lambda_i^n)  
 $$
 
-The general solution is always a **sum of exponential terms**, possibly multiplied by **polynomials in $n$** when eigenvalues repeat.
+The general solution is always a **sum of exponential terms**, possibly multiplied by **polynomials in $n$** when eigenvalues repeat. These polynomials can have constants.
 
 
 ## Inhomogeneous Linear Recurrences 

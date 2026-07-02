@@ -208,7 +208,12 @@ $$
     
 - Core role in eigenvalues:
     
-
 $$  
 \det(A-\lambda I)=0  
+$$
+
+
+Note: 
+$$
+\text{det}(A^n)=(\text{det}(A))^n
 $$
