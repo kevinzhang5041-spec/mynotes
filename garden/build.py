@@ -24,7 +24,7 @@ LOG_FILES = {
 # ---------------------------------------------------------------------------
 files = []
 for root, dirs, filenames in os.walk(VAULT_ROOT):
-    dirs[:] = [d for d in dirs if d != ".obsidian"]
+    dirs[:] = [d for d in dirs if not d.startswith(".")]  # .obsidian, .trash, ...
     for fn in filenames:
         if fn.lower().endswith(".md"):
             files.append(os.path.join(root, fn))
@@ -389,11 +389,50 @@ for a_raw, lst in SUGGESTED.items():
             continue
         suggested_edges.add(tuple(sorted((a, b))))
 
-for a, b in suggested_edges:
-    already = (b in notes[a]["backlinks"]) or (a in notes[b]["backlinks"])
-    if not already:
+# ---------------------------------------------------------------------------
+# 6.5 Inferred connections: when one note's title appears verbatim in another
+#     note's prose, surface the pair as a suggested connection. Only titles of
+#     two or more words qualify, so generic single words ("Energy", "Field")
+#     never trigger a false match. Wikilinks are already tokenized out of the
+#     template, so explicit links can't double-count as mentions.
+# ---------------------------------------------------------------------------
+TOKEN_RE = re.compile(r"@@(MATH|WIKILINK)\d+@@")
+
+infer_patterns = []
+for n in notes.values():
+    t = n["title"]
+    distinctive = (len(t) >= 8 and len(t.split()) >= 2) or (len(t) >= 10 and " " not in t)
+    if n["kind"] == "note" and distinctive:
+        infer_patterns.append((
+            n["id"],
+            re.compile(r"(?<![A-Za-z])" + re.escape(t) + r"(?![A-Za-z])", re.IGNORECASE),
+        ))
+
+inferred_edges = set()
+for src in notes.values():
+    if src["kind"] != "note":
+        continue
+    text = TOKEN_RE.sub(" ", src["template"])
+    for tid, pat in infer_patterns:
+        if tid != src["id"] and pat.search(text):
+            inferred_edges.add(tuple(sorted((src["id"], tid))))
+
+MAX_SUGGESTED_PER_NOTE = 8
+
+def apply_edges(edges):
+    for a, b in sorted(edges):
+        if (b in notes[a]["backlinks"]) or (a in notes[b]["backlinks"]):
+            continue
+        if b in notes[a]["suggested"]:
+            continue
+        if (len(notes[a]["suggested"]) >= MAX_SUGGESTED_PER_NOTE
+                or len(notes[b]["suggested"]) >= MAX_SUGGESTED_PER_NOTE):
+            continue
         notes[a]["suggested"].append(b)
         notes[b]["suggested"].append(a)
+
+apply_edges(suggested_edges)          # curated first, so they never get capped out
+apply_edges(inferred_edges - suggested_edges)
 
 for n in notes.values():
     n["suggested"].sort()

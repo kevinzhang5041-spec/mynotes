@@ -1,6 +1,6 @@
 
 
-Let $(T:V\to W)$ be a linear transformation with
+Let $(T:V\to W)$ be a [[Linear Transformations|linear transformation]] with
 
 $$  
 \dim V=\dim W=n<\infty.  

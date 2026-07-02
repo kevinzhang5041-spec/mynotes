@@ -20,3 +20,4 @@ F_n=\frac{1}{\sqrt{5}}
 \left(\frac{1-\sqrt{5}}{2}\right)^n  
 \right].  
 $$
+Derived from [[Characteristic Equation|characteristic equations]].

@@ -20,3 +20,6 @@ desktop.ini
 
 # Local preview server config (machine-specific ports)
 .claude/launch.json
+
+# Daily sync output (see sync_vault.py / daily_sync.cmd)
+sync_log.txt

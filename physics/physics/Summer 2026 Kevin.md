@@ -76,7 +76,8 @@ Linear Algebra
 
 - [ ] 3.1 Sequences and Series
     
-    - [ ] 3.1.1 Search for a Pattern
+    - [x] 3.1.1 Search for a Pattern ✅ 2026-07-02
+	    - [ ] check 301 
         
     - [ ] 3.1.2 Linear Recursive Sequences
         

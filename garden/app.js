@@ -9,19 +9,29 @@ const $view = document.getElementById("view");
 marked.setOptions({ gfm: true, breaks: false });
 
 const STAGE_META = {
-  seed: { icon: "🌱", label: "seed", color: "var(--cyan-300)" },
-  budding: { icon: "🌿", label: "budding", color: "var(--blue-400)" },
-  evergreen: { icon: "🌳", label: "evergreen", color: "var(--orange-400)" },
-  log: { icon: "📋", label: "log", color: "var(--paper-dimmer)" },
+  seed: { icon: "🌱", label: "seed", color: "var(--green)" },
+  budding: { icon: "🌿", label: "budding", color: "var(--yellow)" },
+  evergreen: { icon: "🌳", label: "evergreen", color: "var(--red)" },
+  log: { icon: "📋", label: "log", color: "var(--pink)" },
 };
 
+/* Matisse cut-out palette: physics in ultramarines, math in vermillion/mustard. */
+const PALETTE = {
+  ink: "#22264b",
+  cream: "#f7f0df",
+  white: "#fdfaf0",
+  blue: "#2d5aa8",
+  red: "#e4572e",
+  yellow: "#f2b632",
+  green: "#3d8b5f",
+};
 const TOP_COLORS = {
-  Physics: { base: "#5490ee", ring: "#74a8f5" },
-  Math: { base: "#ff9a4d", ring: "#ffb877" },
+  Physics: { base: PALETTE.blue, ring: "#7d9cd0" },
+  Math: { base: PALETTE.red, ring: "#e98a2b" },
 };
 const SUB_PALETTE = [
-  "#74a8f5", "#8fe0e6", "#a4c6fb", "#5490ee", "#bcd6fc",
-  "#ff9a4d", "#ffb877", "#cc5a1c", "#ff7a29", "#f7c59f",
+  "#2d5aa8", "#4d79c1", "#1c3670", "#7d9cd0", "#24468c",
+  "#e4572e", "#f2b632", "#c73e1d", "#e79ba7", "#e98a2b",
 ];
 function colorForNote(note) {
   const key = note.topFolder + "/" + (note.relDir.split("/")[1] || note.relDir);
@@ -67,10 +77,10 @@ function sketchSvg(seed, w = 260, h = 90) {
   }
   const dots = Array.from({ length: 3 }, () => {
     const x = rnd() * w, y = rnd() * h;
-    return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(1 + rnd() * 1.6).toFixed(1)}" fill="var(--orange-400)" opacity="0.7"/>`;
+    return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(1 + rnd() * 1.6).toFixed(1)}" fill="var(--red)" opacity="0.7"/>`;
   }).join("");
   return `<svg class="sketch-svg" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
-    <path d="${d}" fill="none" stroke="var(--blue-400)" stroke-width="2" stroke-linecap="round" opacity="0.85"/>
+    <path d="${d}" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" opacity="0.85"/>
     ${dots}
   </svg>`;
 }
@@ -374,8 +384,8 @@ function renderGraph(svgEl, graphData, opts) {
 
   const link = g.append("g").selectAll("line")
     .data(graphData.links).join("line")
-    .attr("stroke", (d) => (d.kind === "suggested" ? "#ff9a4d" : "#5490ee"))
-    .attr("stroke-opacity", (d) => (d.kind === "suggested" ? 0.4 : 0.55))
+    .attr("stroke", (d) => (d.kind === "suggested" ? PALETTE.green : PALETTE.blue))
+    .attr("stroke-opacity", (d) => (d.kind === "suggested" ? 0.45 : 0.4))
     .attr("stroke-dasharray", (d) => (d.kind === "suggested" ? "3,3" : null))
     .attr("stroke-width", 1.3);
 
@@ -383,8 +393,8 @@ function renderGraph(svgEl, graphData, opts) {
     .data(graphData.nodes).join("circle")
     .attr("r", (d) => (opts.big ? 5 + Math.min(d.degree, 10) * 1.1 : 4 + Math.min(d.degree, 8)))
     .attr("fill", (d) => d.color)
-    .attr("stroke", "#12233f")
-    .attr("stroke-width", 1.4)
+    .attr("stroke", PALETTE.white)
+    .attr("stroke-width", 1.6)
     .style("cursor", "pointer")
     .call(d3.drag()
       .on("start", (ev, d) => { if (!ev.active) sim.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
@@ -398,7 +408,7 @@ function renderGraph(svgEl, graphData, opts) {
     .text((d) => d.title)
     .attr("font-size", opts.big ? 10 : 9)
     .attr("font-family", "Inter, sans-serif")
-    .attr("fill", "#c2d0e8")
+    .attr("fill", PALETTE.ink)
     .attr("dx", 8).attr("dy", 3)
     .style("pointer-events", "none")
     .style("opacity", opts.big ? 0 : 0.9);
@@ -417,6 +427,40 @@ function renderGraph(svgEl, graphData, opts) {
     node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
     labels.attr("x", (d) => d.x).attr("y", (d) => d.y);
   });
+}
+
+// ---------------------------------------------------------------------------
+// 3D garden — the whole vault as an orbitable constellation (three.js via
+// 3d-force-graph). One live instance at a time; torn down on every route
+// change so WebGL contexts don't pile up.
+// ---------------------------------------------------------------------------
+let garden3D = null;
+function destroyGarden3D() {
+  if (!garden3D) return;
+  try {
+    if (typeof garden3D._destructor === "function") garden3D._destructor();
+    else garden3D.pauseAnimation();
+  } catch (e) { /* already gone */ }
+  garden3D = null;
+}
+
+function render3DGraph(container, graphData) {
+  destroyGarden3D();
+  garden3D = ForceGraph3D()(container)
+    .width(container.clientWidth)
+    .height(container.clientHeight)
+    .backgroundColor(PALETTE.white)
+    .showNavInfo(false)
+    .nodeColor((d) => d.color)
+    .nodeVal((d) => 1 + Math.min(d.degree, 10) * 0.7)
+    .nodeOpacity(0.95)
+    .nodeLabel((d) => `<span style="color:${PALETTE.ink};background:${PALETTE.cream};padding:3px 9px;border-radius:8px;font-family:Inter,sans-serif;font-size:12px;font-weight:600;box-shadow:0 2px 8px rgba(34,38,75,.18);">${escapeHtml(d.title)}</span>`)
+    .linkColor((l) => (l.kind === "suggested" ? PALETTE.green : PALETTE.blue))
+    .linkOpacity(0.4)
+    .linkWidth((l) => (l.kind === "suggested" ? 0.5 : 1))
+    .onNodeClick((d) => { location.hash = noteHref(d.id); })
+    .graphData(graphData);
+  garden3D.cameraPosition({ z: 320 });
 }
 
 // ---------------------------------------------------------------------------
@@ -457,35 +501,50 @@ function renderHome() {
 
   $view.innerHTML = `
     <div class="home-hero">
-      <h1 class="home-title">Kevin's Notes</h1>
-      <p class="home-sub">Hi! This is my own personal notes from studying physics and math. Each note
-        should have connections to other notes, so feel free to explore! Some connections I drew,
-        while others were suggested by AI. This is an incomplete project (will be complete when I
-        stop learning), and is updated regularly. Note: I'm still working on implementing my sketches
-        using Excalidraw.</p>
+      <svg class="hero-cutouts" viewBox="0 0 300 220" aria-hidden="true">
+        <path fill="${PALETTE.yellow}" d="M58 34c24-20 56-12 62 10 6 21-11 32-30 41-21 10-47 7-54-11-7-17 6-28 22-40z"/>
+        <path fill="${PALETTE.red}" d="M196 14c7 23 28 32 26 55-2 21-25 28-40 15-16-13-13-36-4-53 5-11 14-19 18-17z"/>
+        <path fill="${PALETTE.blue}" d="M104 122c32-9 66 4 68 29 2 24-25 39-55 34-28-4-47-21-42-40 3-15 15-20 29-23z"/>
+        <path fill="${PALETTE.green}" d="M240 118c15 2 28 17 24 34-4 16-22 26-37 19-14-6-17-25-8-38 6-10 13-16 21-15z"/>
+      </svg>
+      <h1 class="home-title">Kevin's garden of<br><span class="accent-blue">physics</span> &amp; <span class="accent-red">math</span></h1>
+      <p class="home-sub">Hi! These are my personal notes from studying physics and math. Each note
+        connects to others, so feel free to explore — some connections I drew myself, others were
+        suggested. This garden will be complete when I stop learning, so it's updated regularly.
+        (Sketches via Excalidraw are still on the way.)</p>
       <div class="home-actions">
         <a class="btn btn-primary" href="#/n/${encodeURIComponent(pickFeatured())}">Start somewhere &rarr;</a>
         <button class="btn btn-ghost" id="homeWander">🎲 wander the garden</button>
       </div>
       <div class="stat-row">
         <div class="stat-chip"><div class="stat-num">${DATA.meta.noteCount}</div><div class="stat-label">notes</div></div>
-        <div class="stat-chip"><div class="stat-num orange">${DATA.meta.linkCount}</div><div class="stat-label">explicit links</div></div>
+        <div class="stat-chip"><div class="stat-num">${DATA.meta.linkCount}</div><div class="stat-label">explicit links</div></div>
         <div class="stat-chip"><div class="stat-num">${Math.round(DATA.meta.suggestedCount)}</div><div class="stat-label">suggested connections</div></div>
-        <div class="stat-chip"><div class="stat-num orange">${DATA.meta.sketchCount}</div><div class="stat-label">hand-drawn sketches</div></div>
-        <div class="stat-chip"><div class="stat-num">${DATA.meta.missingCount}</div><div class="stat-label">notes waiting to be written</div></div>
+        <div class="stat-chip"><div class="stat-num">${DATA.meta.sketchCount}</div><div class="stat-label">hand-drawn sketches</div></div>
+        <div class="stat-chip"><div class="stat-num">${DATA.meta.missingCount}</div><div class="stat-label">waiting to be written</div></div>
       </div>
     </div>
 
     <div class="graph-panel">
       <div class="graph-panel-head">
         <h3>the whole garden, mapped</h3>
-        <div class="graph-legend">
-          <span><span class="legend-dot" style="background:#5490ee"></span>physics</span>
-          <span><span class="legend-dot" style="background:#ff9a4d"></span>math</span>
-          <span><span class="legend-dot" style="background:transparent;border:1px dashed #ff9a4d;"></span>suggested</span>
+        <div class="graph-head-right">
+          <div class="graph-legend">
+            <span><span class="legend-dot" style="background:${PALETTE.blue}"></span>physics</span>
+            <span><span class="legend-dot" style="background:${PALETTE.red}"></span>math</span>
+            <span><span class="legend-dot" style="background:transparent;border:1.5px dashed ${PALETTE.green};"></span>suggested</span>
+          </div>
+          <div class="dim-toggle">
+            <button id="dim3dBtn" class="on">3D</button>
+            <button id="dim2dBtn">2D</button>
+          </div>
         </div>
       </div>
-      <svg id="graphSvg"></svg>
+      <div class="graph-stage">
+        <div id="graph3d"></div>
+        <svg id="graphSvg" style="display:none;"></svg>
+        <div class="graph-hint" id="graphHint">drag to orbit &middot; scroll to zoom &middot; click a note to visit it</div>
+      </div>
     </div>
 
     <div class="section-heading"><span class="tick"></span>Physics</div>
@@ -496,7 +555,37 @@ function renderHome() {
   `;
 
   document.getElementById("homeWander").addEventListener("click", () => document.getElementById("wanderBtn").click());
-  requestAnimationFrame(() => renderGraph(document.getElementById("graphSvg"), buildGraphData(null), { big: true, charge: -160 }));
+
+  const stage3d = document.getElementById("graph3d");
+  const stage2d = document.getElementById("graphSvg");
+  const btn3d = document.getElementById("dim3dBtn");
+  const btn2d = document.getElementById("dim2dBtn");
+  let rendered2d = false;
+
+  function show3D() {
+    btn3d.classList.add("on"); btn2d.classList.remove("on");
+    stage2d.style.display = "none"; stage3d.style.display = "block";
+    document.getElementById("graphHint").textContent = "drag to orbit · scroll to zoom · click a note to visit it";
+    if (!garden3D) render3DGraph(stage3d, buildGraphData(null));
+  }
+  function show2D() {
+    btn2d.classList.add("on"); btn3d.classList.remove("on");
+    stage3d.style.display = "none"; stage2d.style.display = "block";
+    document.getElementById("graphHint").textContent = "drag nodes · scroll to zoom · click a note to visit it";
+    destroyGarden3D();
+    stage3d.innerHTML = "";
+    if (!rendered2d) {
+      rendered2d = true;
+      renderGraph(stage2d, buildGraphData(null), { big: true, charge: -160 });
+    }
+  }
+  btn3d.addEventListener("click", show3D);
+  btn2d.addEventListener("click", show2D);
+
+  requestAnimationFrame(() => {
+    if (typeof ForceGraph3D === "function") show3D();
+    else { btn3d.style.display = "none"; show2D(); }
+  });
   markCurrent(null);
 }
 
@@ -567,7 +656,7 @@ function renderSketch(id) {
     </div>
     <div class="connections">
       <div class="conn-group">
-        <h5><span class="dot" style="background:var(--blue-400)"></span>referenced from</h5>
+        <h5><span class="dot" style="background:var(--blue)"></span>referenced from</h5>
         <div class="conn-list">
           ${refs.length ? refs.map((r) => `<a class="conn-pill" href="${noteHref(r)}">${escapeHtml(DATA.notes[r].title)}</a>`).join("") : '<div class="conn-empty">Not referenced yet.</div>'}
         </div>
@@ -584,10 +673,10 @@ function renderMissing(key) {
     <div class="crumbs"><a href="#/">garden</a><span class="sep">/</span>not yet written</div>
     <div class="stub-box">
       <h2>🌱 “${escapeHtml(m ? m.label : key)}” hasn't been written yet</h2>
-      <p style="color:var(--paper-dim); line-height:1.7;">This is a placeholder for a note that's referenced but doesn't
+      <p style="line-height:1.7;">This is a placeholder for a note that's referenced but doesn't
         exist in the garden yet — a to-do left behind by a wikilink. Nothing lost, just not planted.</p>
       <div class="conn-group" style="margin-top:20px;">
-        <h5><span class="dot" style="background:var(--orange-400)"></span>referenced from</h5>
+        <h5><span class="dot" style="background:var(--green)"></span>referenced from</h5>
         <div class="conn-list">
           ${m ? m.sources.map((s) => `<a class="conn-pill" href="${noteHref(s)}">${escapeHtml(DATA.notes[s].title)}</a>`).join("") : ""}
         </div>
@@ -614,6 +703,14 @@ function renderNote(id) {
 
   const outgoingIds = [...new Set(note.linkTokens.filter((l) => l.resolvedKind === "note").map((l) => l.resolvedId))];
 
+  // notes growing on the same branch (same folder), minus ones already connected
+  const connected = new Set([note.id, ...outgoingIds, ...note.backlinks, ...note.suggested]);
+  const siblings = Object.values(DATA.notes)
+    .filter((n) => n.kind === "note" && n.relDir === note.relDir && !connected.has(n.id))
+    .map((n) => n.id)
+    .sort((a, b) => DATA.notes[a].title.localeCompare(DATA.notes[b].title))
+    .slice(0, 6);
+
   const connGroup = (title, dotColor, ids, cls) => `
     <div class="conn-group">
       <h5><span class="dot" style="background:${dotColor}"></span>${title}</h5>
@@ -632,12 +729,14 @@ function renderNote(id) {
     <div class="note-body">${bodyHtml}</div>
     ${note.kind === "note" ? `
     <div class="connections">
-      ${connGroup("links to", "var(--blue-400)", outgoingIds)}
-      ${connGroup("linked from", "var(--blue-300)", note.backlinks)}
-      ${connGroup("you might also like", "var(--orange-400)", note.suggested, "suggested")}
+      ${connGroup("links to", "var(--blue)", outgoingIds)}
+      ${connGroup("linked from", "var(--red)", note.backlinks)}
+      ${connGroup("you might also like", "var(--green)", note.suggested, "suggested")}
+      ${siblings.length ? connGroup("nearby on this branch", "var(--yellow)", siblings, "sibling") : ""}
     </div>
     ${(outgoingIds.length + note.backlinks.length + note.suggested.length) > 0 ? `
     <div class="ego-wrap">
+      <h6>this note's neighborhood</h6>
       <svg id="egoSvg"></svg>
     </div>` : ""}
     ` : ""}
@@ -660,6 +759,7 @@ function renderNotFound() {
 // ---------------------------------------------------------------------------
 function route() {
   closeSidebarMobile();
+  destroyGarden3D();
   const hash = location.hash.replace(/^#\/?/, "");
   const parts = hash.split("/").filter(Boolean);
   window.scrollTo(0, 0);

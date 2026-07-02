@@ -185,8 +185,8 @@ The matrix columns are:
 $$  
 A=  
 \begin{bmatrix}  
-|&|&&|\  
-T(e_1)&T(e_2)&\cdots&T(e_n)\  
+|&|&&|\\  
+T(e_1)&T(e_2)&\cdots&T(e_n)\\  
 |&|&&|  
 \end{bmatrix}  
 $$
