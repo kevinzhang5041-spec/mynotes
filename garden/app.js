@@ -8,6 +8,12 @@ const $view = document.getElementById("view");
 
 marked.setOptions({ gfm: true, breaks: false });
 
+/* LaTeX commands used in the vault that KaTeX doesn't ship with. */
+const KATEX_MACROS = {
+  "\\mathbfit": "\\boldsymbol{#1}",
+  "\\matrix": "\\begin{matrix}#1\\end{matrix}",
+};
+
 const STAGE_META = {
   seed: { icon: "🌱", label: "seed", color: "var(--green)" },
   budding: { icon: "🌿", label: "budding", color: "var(--yellow)" },
@@ -97,7 +103,7 @@ function renderNoteBody(note) {
     const m = note.mathTokens[Number(i)];
     if (!m) return "";
     try {
-      return katex.renderToString(m.tex, { throwOnError: false, displayMode: m.display });
+      return katex.renderToString(m.tex, { throwOnError: false, displayMode: m.display, macros: KATEX_MACROS });
     } catch (e) {
       return `<code>${escapeHtml(m.tex)}</code>`;
     }
@@ -322,7 +328,8 @@ document.getElementById("menuToggle").addEventListener("click", () => sidebarEl.
 document.getElementById("mobileSearchToggle").addEventListener("click", () => { openSidebarMobile(); searchInput.focus(); });
 scrimEl.addEventListener("click", closeSidebarMobile);
 
-document.getElementById("wanderBtn").addEventListener("click", () => {
+document.getElementById("wanderBtn").addEventListener("click", (e) => {
+  wiggle(e.currentTarget);
   const ids = Object.keys(DATA.notes).filter((id) => DATA.notes[id].kind === "note");
   const pick = ids[Math.floor(Math.random() * ids.length)];
   location.hash = noteHref(pick);
@@ -483,7 +490,7 @@ function categoryDesc(name) {
 }
 
 function renderHome() {
-  document.title = "my notes";
+  document.title = "Kevin and Mahith's garden";
   const physicsCats = DATA.tree.Physics.children;
   const mathCats = DATA.tree.Math.children;
 
@@ -507,8 +514,8 @@ function renderHome() {
         <path fill="${PALETTE.blue}" d="M104 122c32-9 66 4 68 29 2 24-25 39-55 34-28-4-47-21-42-40 3-15 15-20 29-23z"/>
         <path fill="${PALETTE.green}" d="M240 118c15 2 28 17 24 34-4 16-22 26-37 19-14-6-17-25-8-38 6-10 13-16 21-15z"/>
       </svg>
-      <h1 class="home-title">Kevin's garden of<br><span class="accent-blue">physics</span> &amp; <span class="accent-red">math</span></h1>
-      <p class="home-sub">Hi! These are my personal notes from studying physics and math. Each note
+      <h1 class="home-title">Kevin &amp; Mahith's garden of<br><span class="accent-blue">physics</span> &amp; <span class="accent-red">math</span></h1>
+      <p class="home-sub">Hi! These are our personal notes from studying physics and math. Each note
         connects to others, so feel free to explore — some connections I drew myself, others were
         suggested. This garden will be complete when I stop learning, so it's updated regularly.
         (Sketches via Excalidraw are still on the way.)</p>
@@ -607,7 +614,7 @@ function renderCategory(top, name) {
   function collect(n, acc) { n.files.forEach((f) => acc.push(f)); n.children.forEach((c) => collect(c, acc)); return acc; }
   const files = collect(node, []).sort((a, b) => a.title.localeCompare(b.title));
 
-  document.title = `${name} — my notes`;
+  document.title = `${name} — Kevin and Mahith's garden`;
   $view.innerHTML = `
     <div class="crumbs"><a href="#/">garden</a><span class="sep">/</span>${escapeHtml(top)}<span class="sep">/</span>${escapeHtml(name)}</div>
     <h1 class="note-title" style="margin-bottom:22px;">${escapeHtml(name)}</h1>
@@ -693,10 +700,10 @@ function renderMissing(key) {
 function renderNote(id) {
   const note = DATA.notes[id];
   if (!note) return renderNotFound();
-  document.title = `${note.title} — my notes`;
+  document.title = `${note.title} — Kevin and Mahith's garden`;
 
   const crumbs = note.kind === "log"
-    ? `<a href="#/">my notes</a><span class="sep">/</span>Study Log`
+    ? `<a href="#/">garden</a><span class="sep">/</span>Study Log`
     : [note.topFolder, ...note.relDir.split("/").slice(1)].filter(Boolean).map((p, i, arr) => {
         if (i === 0) return `<a href="#/">${escapeHtml(p)}</a>`;
         return `<a href="#/cat/${arr[0]}/${encodeURIComponent(p)}">${escapeHtml(p)}</a>`;
@@ -759,6 +766,70 @@ function renderNotFound() {
 }
 
 // ---------------------------------------------------------------------------
+// Animations (anime.js). Entrance animations run after every route render;
+// transforms are cleared on completion so CSS :hover transforms keep working.
+// Skipped entirely when the user prefers reduced motion.
+// ---------------------------------------------------------------------------
+const ANIMATE = typeof anime === "function"
+  && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function clearTransforms(a) {
+  a.animatables.forEach((x) => { x.target.style.transform = ""; x.target.style.opacity = ""; });
+}
+
+function animateView() {
+  if (!ANIMATE) return;
+  anime({
+    targets: "#view > *",
+    translateY: [16, 0],
+    opacity: [0, 1],
+    duration: 480,
+    delay: anime.stagger(70),
+    easing: "easeOutCubic",
+    complete: clearTransforms,
+  });
+  anime({
+    targets: "#view .cat-card, #view .conn-pill, #view .sketch-tile, #view .stat-chip",
+    scale: [0.92, 1],
+    opacity: [0, 1],
+    duration: 420,
+    delay: anime.stagger(22, { start: 120 }),
+    easing: "easeOutQuad",
+    complete: clearTransforms,
+  });
+  const cutouts = document.querySelectorAll(".hero-cutouts path");
+  if (cutouts.length) {
+    anime({
+      targets: cutouts,
+      scale: [0, 1],
+      duration: 700,
+      delay: anime.stagger(110, { start: 150 }),
+      easing: "easeOutBack",
+      complete: () => anime({          // then drift forever, like paper cut-outs settling
+        targets: cutouts,
+        translateY: [-5, 5],
+        direction: "alternate",
+        loop: true,
+        duration: 2800,
+        delay: anime.stagger(340),
+        easing: "easeInOutSine",
+      }),
+    });
+  }
+}
+
+function wiggle(el) {
+  if (!ANIMATE || !el) return;
+  anime({
+    targets: el,
+    rotate: [{ value: -5 }, { value: 5 }, { value: 0 }],
+    duration: 380,
+    easing: "easeInOutSine",
+    complete: clearTransforms,
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Router
 // ---------------------------------------------------------------------------
 function route() {
@@ -768,13 +839,15 @@ function route() {
   const parts = hash.split("/").filter(Boolean);
   window.scrollTo(0, 0);
 
-  if (parts.length === 0) return renderHome();
-  if (parts[0] === "n") return renderNote(decodeURIComponent(parts.slice(1).join("/")));
-  if (parts[0] === "s") return renderSketch(decodeURIComponent(parts.slice(1).join("/")));
-  if (parts[0] === "m") return renderMissing(decodeURIComponent(parts.slice(1).join("/")));
-  if (parts[0] === "sketches") return renderSketches();
-  if (parts[0] === "cat") return renderCategory(decodeURIComponent(parts[1]), decodeURIComponent(parts[2]));
-  return renderNotFound();
+  if (parts.length === 0) renderHome();
+  else if (parts[0] === "n") renderNote(decodeURIComponent(parts.slice(1).join("/")));
+  else if (parts[0] === "s") renderSketch(decodeURIComponent(parts.slice(1).join("/")));
+  else if (parts[0] === "m") renderMissing(decodeURIComponent(parts.slice(1).join("/")));
+  else if (parts[0] === "sketches") renderSketches();
+  else if (parts[0] === "cat") renderCategory(decodeURIComponent(parts[1]), decodeURIComponent(parts[2]));
+  else renderNotFound();
+
+  animateView();
 }
 
 window.addEventListener("hashchange", route);

@@ -270,6 +270,7 @@ a { color: inherit; }
   pointer-events: none;
   opacity: 0.95;
 }
+.hero-cutouts path { transform-box: fill-box; transform-origin: center; }
 .home-title {
   font-family: var(--font-display);
   font-size: 52px;

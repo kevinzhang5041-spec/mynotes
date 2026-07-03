@@ -173,6 +173,10 @@ def parse_body(raw_text, record):
 
     text = WIKILINK_RE.sub(sub_link, text)
 
+    # an unclosed $$ fence (author left a dangling one) would otherwise show
+    # up as literal dollar signs on the page — drop orphan $$ lines
+    text = re.sub(r"^\s*\$\$\s*$", "", text, flags=re.MULTILINE)
+
     return text.strip(), math_tokens, link_tokens
 
 

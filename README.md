@@ -1,4 +1,4 @@
-# my notes
+# Kevin and Mahith's garden
 
 A digital garden built from an Obsidian vault of physics and math notes. The
 site is fully static (no server-side code) and lives in [`garden/`](garden);
