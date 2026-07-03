@@ -21,23 +21,24 @@ const STAGE_META = {
   log: { icon: "📋", label: "log", color: "var(--pink)" },
 };
 
-/* Matisse cut-out palette: physics in ultramarines, math in vermillion/mustard. */
+/* Palette from Matisse's "The Terrace, Saint-Tropez": physics in sky blues,
+   math in terracotta/ochre/rose, on sun-bleached cream. */
 const PALETTE = {
-  ink: "#22264b",
-  cream: "#f7f0df",
-  white: "#fdfaf0",
-  blue: "#2d5aa8",
-  red: "#e4572e",
-  yellow: "#f2b632",
-  green: "#3d8b5f",
+  ink: "#24403a",
+  cream: "#f2eee0",
+  white: "#fbf9f0",
+  blue: "#4a7aa8",
+  red: "#c25b41",
+  yellow: "#d9a95f",
+  green: "#4f9d7d",
 };
 const TOP_COLORS = {
-  Physics: { base: PALETTE.blue, ring: "#7d9cd0" },
-  Math: { base: PALETTE.red, ring: "#e98a2b" },
+  Physics: { base: PALETTE.blue, ring: "#93b7d6" },
+  Math: { base: PALETTE.red, ring: "#d98d6b" },
 };
 const SUB_PALETTE = [
-  "#2d5aa8", "#4d79c1", "#1c3670", "#7d9cd0", "#24468c",
-  "#e4572e", "#f2b632", "#c73e1d", "#e79ba7", "#e98a2b",
+  "#4a7aa8", "#6f9cc4", "#2f5a80", "#93b7d6", "#3c6d96",
+  "#c25b41", "#d9a95f", "#a34630", "#d5a09b", "#cb7a52",
 ];
 function colorForNote(note) {
   const key = note.topFolder + "/" + (note.relDir.split("/")[1] || note.relDir);

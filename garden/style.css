@@ -1,36 +1,38 @@
 /* ---------------------------------------------------------------------------
-   Matisse garden — palette lifted from the cut-outs: ultramarine panels,
-   vermillion and mustard shapes, leaf green, all on warm cream paper.
+   Matisse garden — palette lifted from "The Terrace, Saint-Tropez" (1904):
+   pale sky, seafoam-green shutters, terracotta-rose terrace, deep pine
+   foliage, coral blossoms, all on sun-bleached cream.
 --------------------------------------------------------------------------- */
 :root {
-  --cream: #f7f0df;
-  --cream-deep: #efe4c9;
-  --white: #fdfaf0;
-  --ink: #22264b;
-  --ink-soft: #4c5170;
-  --ink-faint: #8a8ca3;
-  --blue: #2d5aa8;
-  --blue-deep: #24468c;
-  --blue-night: #1c3670;
-  --blue-soft: #7d9cd0;
-  --red: #e4572e;
-  --red-deep: #c73e1d;
-  --yellow: #f2b632;
-  --yellow-soft: #f8d284;
-  --green: #3d8b5f;
-  --green-deep: #2f6d4a;
-  --pink: #e79ba7;
-  --tint-blue: #e3ebf9;
-  --tint-red: #fbe7de;
-  --tint-yellow: #fbf0d2;
-  --tint-green: #e2f0e7;
-  --tint-pink: #f9e6ea;
-  --border: rgba(34, 38, 75, 0.14);
-  --border-strong: rgba(34, 38, 75, 0.28);
-  --border-blue: rgba(247, 240, 223, 0.22);
-  --border-blue-strong: rgba(247, 240, 223, 0.42);
-  --shadow: 0 2px 0 rgba(34, 38, 75, 0.12);
-  --shadow-lift: 0 6px 18px rgba(34, 38, 75, 0.14);
+  --cream: #f2eee0;
+  --cream-deep: #e7dfc9;
+  --white: #fbf9f0;
+  --ink: #24403a;
+  --ink-soft: #4c635c;
+  --ink-faint: #85978e;
+  --blue: #4a7aa8;
+  --pine: #2a5f4c;         /* sidebar: the green shutters, deepened */
+  --pine-night: #1d4a3a;
+  --pine-light: #35705b;
+  --pine-soft: #93c4ab;
+  --red: #c25b41;          /* terracotta coral */
+  --red-deep: #a34630;
+  --yellow: #d9a95f;       /* sandy ochre */
+  --yellow-soft: #edd6a8;
+  --green: #4f9d7d;        /* seafoam */
+  --green-deep: #35755b;
+  --pink: #d5a09b;         /* dusty terrace rose */
+  --tint-blue: #e3edf5;
+  --tint-red: #f6e5de;
+  --tint-yellow: #f4ecd6;
+  --tint-green: #e2efe8;
+  --tint-pink: #f5e8e5;
+  --border: rgba(36, 64, 58, 0.14);
+  --border-strong: rgba(36, 64, 58, 0.28);
+  --border-blue: rgba(242, 238, 224, 0.22);
+  --border-blue-strong: rgba(242, 238, 224, 0.42);
+  --shadow: 0 2px 0 rgba(36, 64, 58, 0.12);
+  --shadow-lift: 0 6px 18px rgba(36, 64, 58, 0.14);
   --font-display: "Fraunces", Georgia, serif;
   --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
@@ -61,7 +63,7 @@ a { color: inherit; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--cream-deep); border-radius: 6px; border: 2px solid var(--cream); }
 ::-webkit-scrollbar-thumb:hover { background: var(--yellow); }
-.sidebar::-webkit-scrollbar-thumb { background: var(--blue); border-color: var(--blue-deep); }
+.sidebar::-webkit-scrollbar-thumb { background: var(--pine-light); border-color: var(--pine); }
 
 #app {
   position: relative;
@@ -72,14 +74,14 @@ a { color: inherit; }
 }
 
 /* ---------------------------------------------------------------- Sidebar
-   A tall ultramarine cut-out panel, cream ink on blue. */
+   A tall panel in the painting's shutter green, cream ink on pine. */
 .sidebar {
   position: sticky;
   top: 0;
   height: 100vh;
   overflow-y: auto;
   padding: 26px 20px 20px;
-  background: var(--blue-deep);
+  background: var(--pine);
   color: var(--cream);
   display: flex;
   flex-direction: column;
@@ -109,11 +111,11 @@ a { color: inherit; }
 .search-box { position: relative; }
 .search-icon {
   position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
-  width: 15px; height: 15px; fill: none; stroke: var(--blue-soft); stroke-width: 2;
+  width: 15px; height: 15px; fill: none; stroke: var(--pine-soft); stroke-width: 2;
 }
 #searchInput {
   width: 100%;
-  background: var(--blue-night);
+  background: var(--pine-night);
   border: 1px solid var(--border-blue);
   border-radius: 999px;
   color: var(--cream);
@@ -124,7 +126,7 @@ a { color: inherit; }
   transition: border-color .15s;
 }
 #searchInput:focus { border-color: var(--yellow); }
-#searchInput::placeholder { color: var(--blue-soft); }
+#searchInput::placeholder { color: var(--pine-soft); }
 
 .search-results {
   position: absolute;
@@ -169,10 +171,10 @@ a { color: inherit; }
   margin: 18px 0 6px;
   font-weight: 700;
 }
-.nt-section-title.st-yellow { color: var(--yellow); }
-.nt-section-title.st-coral { color: #ffab8f; }
-.nt-section-title.st-mint { color: #9fdcba; }
-.nt-section-title.st-pink { color: #f3bcc8; }
+.nt-section-title.st-yellow { color: #e6c483; }
+.nt-section-title.st-coral { color: #f0b39c; }
+.nt-section-title.st-mint { color: #a6d9c0; }
+.nt-section-title.st-pink { color: #ecc6c0; }
 .nt-section-title:first-child { margin-top: 2px; }
 
 .nt-dir > .nt-dir-label {
@@ -185,11 +187,11 @@ a { color: inherit; }
   color: var(--cream);
   user-select: none;
 }
-.nt-dir > .nt-dir-label:hover { background: var(--blue); }
+.nt-dir > .nt-dir-label:hover { background: var(--pine-light); }
 .nt-dir-label .chev {
   width: 8px; height: 8px;
-  border-right: 1.6px solid var(--blue-soft);
-  border-bottom: 1.6px solid var(--blue-soft);
+  border-right: 1.6px solid var(--pine-soft);
+  border-bottom: 1.6px solid var(--pine-soft);
   transform: rotate(-45deg);
   transition: transform .15s;
   flex: none;
@@ -216,7 +218,7 @@ a { color: inherit; }
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.nt-file:hover { background: var(--blue); color: var(--cream); }
+.nt-file:hover { background: var(--pine-light); color: var(--cream); }
 .nt-file.current { background: var(--yellow); color: var(--ink); font-weight: 600; }
 .nt-file.current .stage-dot { border: 1px solid var(--ink); }
 .stage-dot { flex: none; width: 8px; height: 8px; border-radius: var(--radius-blob); }
@@ -232,7 +234,7 @@ a { color: inherit; }
   flex-direction: column;
   gap: 10px;
 }
-.stats-line { color: var(--blue-soft); font-size: 11.5px; line-height: 1.6; }
+.stats-line { color: var(--pine-soft); font-size: 11.5px; line-height: 1.6; }
 .stats-line b { color: var(--yellow); font-weight: 600; }
 .wander-btn {
   background: var(--red);
@@ -259,18 +261,24 @@ a { color: inherit; }
 /* ---- Home ---- */
 .home-hero {
   position: relative;
-  padding: 38px 0 30px;
+  padding: 38px 300px 30px 0; /* right padding keeps the title clear of the cut-outs */
   margin-bottom: 30px;
   overflow: visible;
 }
 .hero-cutouts {
   position: absolute;
-  inset: -20px -10px auto auto;
-  width: 300px; height: 220px;
+  inset: -14px 0 auto auto;
+  width: 270px; height: 200px;
   pointer-events: none;
   opacity: 0.95;
 }
 .hero-cutouts path { transform-box: fill-box; transform-origin: center; }
+.home-hero .stat-row { margin-right: -300px; } /* stats may use the full width again */
+@media (max-width: 1280px) {
+  .home-hero { padding-right: 230px; }
+  .hero-cutouts { width: 210px; height: 156px; }
+  .home-hero .stat-row { margin-right: -230px; }
+}
 .home-title {
   font-family: var(--font-display);
   font-size: 52px;
@@ -494,7 +502,7 @@ a { color: inherit; }
 .note-body th { color: var(--blue); font-weight: 600; background: var(--white); }
 
 /* katex color tuning */
-.note-body .katex { font-size: 1.06em; color: var(--blue-night); }
+.note-body .katex { font-size: 1.06em; color: #2f5a80; }
 .note-body .katex-display { margin: 18px 0; overflow-x: auto; overflow-y: hidden; padding: 4px 0; }
 .note-body h1 .katex-display, .note-body h1 .katex { color: var(--red); }
 
@@ -666,7 +674,7 @@ a { color: inherit; }
     display: flex; align-items: center; gap: 12px;
     position: sticky; top: 0; z-index: 30;
     padding: 12px 16px;
-    background: var(--blue-deep);
+    background: var(--pine);
   }
   .mobile-title { font-family: var(--font-display); color: var(--cream); text-decoration: none; font-size: 15px; flex: 1; }
   .icon-btn { background: none; border: none; padding: 6px; cursor: pointer; }
@@ -679,12 +687,14 @@ a { color: inherit; }
   }
   .sidebar.open { transform: translateX(0); }
   .sidebar-scrim {
-    display: block; position: fixed; inset: 0; background: rgba(28, 54, 112, .55);
+    display: block; position: fixed; inset: 0; background: rgba(24, 58, 47, .55);
     opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 40;
   }
   .sidebar-scrim.open { opacity: 1; pointer-events: auto; }
   .main { padding: 24px 18px 70px; }
   .home-title { font-size: 34px; }
   .hero-cutouts { display: none; }
+  .home-hero { padding-right: 0; }
+  .home-hero .stat-row { margin-right: 0; }
   .graph-stage { height: 340px; }
 }
