@@ -1,8 +1,4 @@
-
-## Definition
-
 For a sequence
-
 $$  
 a_0,a_1,a_2,\dots  
 $$

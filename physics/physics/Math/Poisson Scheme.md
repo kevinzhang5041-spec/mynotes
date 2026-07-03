@@ -1,6 +1,5 @@
 
 The **Poisson probability scheme** encodes the probabilities of independent events into a polynomial.
-## Basic Idea
 
 For each independent trial:
 

@@ -1,6 +1,3 @@
-
-**Intuition**
-
 - An **eigenvector** is a nonzero vector whose **direction does not change** when multiplied by a matrix.
     
 - An **eigenvalue** is the scalar by which the eigenvector is stretched, shrunk, or flipped.

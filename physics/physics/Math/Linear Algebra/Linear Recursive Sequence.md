@@ -81,10 +81,7 @@ D^n =
 \vdots & \vdots & \ddots  
 \end{bmatrix}  
 $$
-
----
-
-**Characteristic Equation**
+Where $\lambda_i$ are the eigenvalues.
 
 [[Eigenvectors and Eigenvalues|Eigenvalues]] satisfy
 
@@ -93,6 +90,8 @@ $$
 $$
 
 This becomes the **[[Characteristic Equation|characteristic polynomial]]** of the recurrence.
+
+When you multiply $D^n$ by $P$ and $P^{-1}$, you only change the coefficients, which leads to the solution form.
 
 ---
 

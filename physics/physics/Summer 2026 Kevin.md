@@ -80,7 +80,8 @@ Linear Algebra
 	    - [ ] check 301 
         
     - [ ] 3.1.2 Linear Recursive Sequences
-        
+	    - [ ] 307 wrong?
+	    - [ ] redo 308
     - [ ] 3.1.3 Limits of Sequences
         
     - [ ] 3.1.4 More About Limits of Sequences

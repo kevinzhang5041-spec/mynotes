@@ -8,17 +8,17 @@ $$
 
 Then the following are equivalent:
 
-- (T) is invertible.
+- $T$ is invertible.
     
-- (T) is non-singular (one-to-one).
+- $T$ is non-singular (one-to-one).
     
-- (T) is onto ((T(V)=W)).
+- $T$ is onto $T(V)=W$.
     
-- For **every** basis $${\alpha_1,\ldots,\alpha_n}$$ of (V),  
-    $${T\alpha_1,\ldots,T\alpha_n}$$ is a basis of (W).
+- For **every** basis $${\alpha_1,\ldots,\alpha_n}$$ of $V$,  
+    $${T\alpha_1,\ldots,T\alpha_n}$$ is a basis of $W$.
     
-- There exists **some** basis $${\alpha_1,\ldots,\alpha_n}$$ of (V) such that  
-    $${T\alpha_1,\ldots,T\alpha_n}$$ is a basis of (W).
+- There exists **some** basis $${\alpha_1,\ldots,\alpha_n}$$ of $V$ such that  
+    $${T\alpha_1,\ldots,T\alpha_n}$$ is a basis of $W$.
     
 
 ---
@@ -29,14 +29,14 @@ $$
 \operatorname{rank}(T)+\operatorname{nullity}(T)=n.  
 $$
 
-- (T) non-singular iff
+- $T$ non-singular if
     
 
 $$  
 \operatorname{nullity}(T)=0.  
 $$
 
-- (T) onto iff
+- $T$ onto if
     
 
 $$  
@@ -67,7 +67,7 @@ $$
 \text{invertible}.  
 $$
 
-(Only valid when $$\dim V=\dim W<\infty$$.)
+(Only valid when $\dim V=\dim W<\infty$.)
 
 ---
 
@@ -77,13 +77,13 @@ $$
 (i)\Rightarrow(ii)\Rightarrow(iii)\Rightarrow(iv)\Rightarrow(v)\Rightarrow(i).  
 $$
 
-- Invertible $$\Rightarrow$$ one-to-one.
+- Invertible $\Rightarrow$ one-to-one.
     
-- One-to-one $$\Rightarrow$$ images of a basis are linearly independent.
+- One-to-one $\Rightarrow$ images of a basis are linearly independent.
     
-- Onto $$\Rightarrow$$ images of any basis span (W), hence form a basis.
+- Onto $\Rightarrow$ images of any basis span $W$, hence form a basis.
     
-- If images of some basis form a basis, then (T) is both onto and one-to-one, hence invertible.
+- If images of some basis form a basis, then $T$ is both onto and one-to-one, hence invertible.
     
 
 ---
@@ -114,4 +114,4 @@ $$
 
 or
 
-the images of a basis of (V) form a basis of (W).
+the images of a basis of $V$ form a basis of $W$.
