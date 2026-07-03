@@ -14,11 +14,26 @@ const KATEX_MACROS = {
   "\\matrix": "\\begin{matrix}#1\\end{matrix}",
 };
 
+/* Generated inline icons (1em, stroke = currentColor) — no emoji anywhere. */
+const ICONS = {
+  seed: `<svg class="ic" viewBox="0 0 24 24"><path d="M12 21v-8"/><path d="M12 13c0-4-3-6-7-6 0 4 3 6 7 6Z"/></svg>`,
+  budding: `<svg class="ic" viewBox="0 0 24 24"><path d="M12 21V11"/><path d="M12 13c0-4-3-6-7-6 0 4 3 6 7 6Z"/><path d="M12 11c0-3 2.5-5 6-5 0 3.5-2.5 5-6 5Z"/></svg>`,
+  evergreen: `<svg class="ic" viewBox="0 0 24 24"><path d="M12 3 5 13h4l-3 6h12l-3-6h4L12 3Z"/><path d="M12 19v3"/></svg>`,
+  log: `<svg class="ic" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>`,
+  dice: `<svg class="ic" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="9" r="1.3" fill="currentColor" stroke="none"/><circle cx="9" cy="15" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="15" r="1.3" fill="currentColor" stroke="none"/></svg>`,
+  pencil: `<svg class="ic" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>`,
+  rocket: `<svg class="ic" viewBox="0 0 24 24"><path d="M12 2c3 2.5 4 6 4 9.5L12 15l-4-3.5C8 8 9 4.5 12 2Z"/><path d="M8 11c-2 1-3 3-3 6 2.5 0 4.5-1 5.5-2.5"/><path d="M16 11c2 1 3 3 3 6-2.5 0-4.5-1-5.5-2.5"/><circle cx="12" cy="8" r="1.3"/></svg>`,
+  land: `<svg class="ic" viewBox="0 0 24 24"><path d="M12 3v11"/><path d="m8 10 4 4 4-4"/><path d="M4 20h16"/></svg>`,
+  burst: `<svg class="ic" viewBox="0 0 24 24"><path d="M12 2v5M12 17v5M2 12h5M17 12h5M4.9 4.9l3.5 3.5M15.6 15.6l3.5 3.5M19.1 4.9l-3.5 3.5M8.4 15.6l-3.5 3.5"/></svg>`,
+  flame: `<svg class="ic" viewBox="0 0 24 24"><path d="M12 22c-4 0-6.5-2.5-6.5-6C5.5 12 9 10 9 6c2.5 1.5 3 3.5 3 5 1-1 2-3 2-5.5 3.5 2.5 4.5 5.5 4.5 10.5 0 3.5-2.5 6-6.5 6Z"/></svg>`,
+  leaf: `<svg class="ic" viewBox="0 0 24 24"><path d="M4 20C4 10 10 4 20 4c0 10-6 16-16 16Z"/><path d="M4 20c4-6 8-10 12-12"/></svg>`,
+};
+
 const STAGE_META = {
-  seed: { icon: "🌱", label: "seed", color: "var(--green)" },
-  budding: { icon: "🌿", label: "budding", color: "var(--yellow)" },
-  evergreen: { icon: "🌳", label: "evergreen", color: "var(--red)" },
-  log: { icon: "📋", label: "log", color: "var(--pink)" },
+  seed: { icon: ICONS.seed, label: "seed", color: "var(--green)" },
+  budding: { icon: ICONS.budding, label: "budding", color: "var(--yellow)" },
+  evergreen: { icon: ICONS.evergreen, label: "evergreen", color: "var(--red)" },
+  log: { icon: ICONS.log, label: "log", color: "var(--pink)" },
 };
 
 /* Palette from Matisse's "The Terrace, Saint-Tropez": physics in sky blues,
@@ -146,7 +161,7 @@ function renderLink(link) {
         ${sk.svg ? `<div class="xd-embed">${sk.svg}</div>` : sketchSvg(sk.id)}
       </a>`;
     }
-    return `<a class="wl" href="${sketchHref(link.resolvedId)}">${label} ✏️</a>`;
+    return `<a class="wl" href="${sketchHref(link.resolvedId)}">${label} ${ICONS.pencil}</a>`;
   }
   if (link.resolvedKind === "asset-missing") {
     return `<span class="embed-card" style="cursor:default;">
@@ -542,7 +557,7 @@ function flyerHudHtml() {
       <span class="fh-chip" id="fhBest"></span>
     </div>
     <div class="fh-hint">&larr;&rarr; steer &middot; &uarr;&darr; pitch &middot; shift boost &middot; space brake &middot; esc land</div>
-    <div class="fh-ready" id="fhReady">🚀 engines on — go!</div>`;
+    <div class="fh-ready" id="fhReady">${ICONS.rocket} engines on — go!</div>`;
 }
 
 async function startGame() {
@@ -556,7 +571,7 @@ async function startGame() {
   } catch (e) {
     console.warn("Garden Flyer: couldn't load three.js", e);
     const b = document.getElementById("flyBtn");
-    if (b) { b.removeAttribute("disabled"); b.textContent = "🚀 fly (offline?)"; }
+    if (b) { b.removeAttribute("disabled"); b.innerHTML = `${ICONS.rocket} fly (offline?)`; }
     return;
   }
   // the route (and with it the graph) may have changed while three.js loaded
@@ -565,7 +580,7 @@ async function startGame() {
     return;
   }
   const btn = document.getElementById("flyBtn");
-  if (btn) { btn.removeAttribute("disabled"); btn.textContent = "🛬 land"; }
+  if (btn) { btn.removeAttribute("disabled"); btn.innerHTML = `${ICONS.land} land`; }
 
   const scene = garden3D.scene();
   const camera = garden3D.camera();
@@ -574,10 +589,14 @@ async function startGame() {
 
   garden3D.controls().enabled = false;
   garden3D.enablePointerInteraction(false);
+  garden3D.enableNodeDrag(false); // separate toggle — spheres must not move mid-flight
   if (panel) {
     panel.classList.add("playing");
     garden3D.width(stage.clientWidth).height(stage.clientHeight);
   }
+  // Take over rendering: the graph's own loop calls controls().update() every
+  // frame, which re-asserts the orbit camera and fights the chase camera.
+  garden3D.pauseAnimation();
 
   const hud = document.createElement("div");
   hud.className = "fly-hud";
@@ -597,6 +616,7 @@ async function startGame() {
     crashed: false, shards: [], raf: 0,
     best: Number(localStorage.getItem("gardenFlyerBest") || 0),
   };
+  window.__gardenFlyer = game; // handy for curious pilots (and debugging)
   const bestEl = document.getElementById("fhBest");
   if (bestEl && game.best) bestEl.textContent = `best ${game.best.toFixed(1)}s`;
   setTimeout(() => document.getElementById("fhReady")?.classList.add("gone"), 1600);
@@ -665,7 +685,7 @@ function crashFlight(cause) {
     const card = document.createElement("div");
     card.className = "fly-crash";
     card.innerHTML = `
-      <h4>💥 ${escapeHtml(cause)}</h4>
+      <h4>${ICONS.burst} ${escapeHtml(cause)}</h4>
       <p>you survived <b>${survived.toFixed(1)}s</b>${g.best ? ` &middot; best ${g.best.toFixed(1)}s` : ""}</p>
       <div class="fc-actions">
         <button class="btn btn-primary" id="fcAgain">fly again <span class="kbd">R</span></button>
@@ -695,6 +715,7 @@ function flightTick(now) {
       if (s.life <= 0 && s.mesh.parent) s.mesh.parent.remove(s.mesh);
     });
     g.shards = g.shards.filter((s) => s.life > 0);
+    renderFlightFrame(g);
     return;
   }
 
@@ -731,7 +752,7 @@ function flightTick(now) {
 
   const elapsed = (now - g.t0) / 1000;
   const timeEl = document.getElementById("fhTime");
-  if (timeEl) timeEl.textContent = `${elapsed.toFixed(1)}s${boost ? " 🔥" : ""}`;
+  if (timeEl) timeEl.innerHTML = `${elapsed.toFixed(1)}s${boost ? ICONS.flame : ""}`;
 
   if (elapsed > 1.4) { // spawn grace, then everything is solid
     const { nodes, links } = garden3D.graphData();
@@ -750,12 +771,20 @@ function flightTick(now) {
       }
     }
   }
+
+  renderFlightFrame(g);
+}
+
+function renderFlightFrame(g) {
+  if (!garden3D) return;
+  garden3D.renderer().render(garden3D.scene(), g.camera);
 }
 
 function endGame(restoreView = true) {
   const g = game;
   if (!g) return;
   game = null;
+  delete window.__gardenFlyer;
   cancelAnimationFrame(g.raf);
   window.removeEventListener("keydown", g.onKey);
   window.removeEventListener("keyup", g.onKey);
@@ -763,14 +792,16 @@ function endGame(restoreView = true) {
   if (g.ship.parent) g.ship.parent.remove(g.ship);
   g.hud.remove();
   const btn = document.getElementById("flyBtn");
-  if (btn) btn.textContent = "🚀 fly";
+  if (btn) btn.innerHTML = `${ICONS.rocket} fly`;
   if (g.panel) g.panel.classList.remove("playing");
   if (restoreView && garden3D) {
     const stage = document.getElementById("graph3d");
     if (stage) garden3D.width(stage.clientWidth).height(stage.clientHeight);
     g.camera.up.set(0, 1, 0);
+    garden3D.resumeAnimation();
     garden3D.controls().enabled = true;
     garden3D.enablePointerInteraction(true);
+    garden3D.enableNodeDrag(true);
     garden3D.cameraPosition(
       { x: g.savedCam.pos.x, y: g.savedCam.pos.y, z: g.savedCam.pos.z },
       { x: 0, y: 0, z: 0 },
@@ -830,7 +861,7 @@ function renderHome() {
         (Sketches via Excalidraw are still on the way.)</p>
       <div class="home-actions">
         <a class="btn btn-primary" href="#/n/${encodeURIComponent(pickFeatured())}">Start somewhere &rarr;</a>
-        <button class="btn btn-ghost" id="homeWander">🎲 wander the garden</button>
+        <button class="btn btn-ghost" id="homeWander">${ICONS.dice} wander the garden</button>
       </div>
       <div class="stat-row">
         <div class="stat-chip"><div class="stat-num">${DATA.meta.noteCount}</div><div class="stat-label">notes</div></div>
@@ -850,7 +881,7 @@ function renderHome() {
             <span><span class="legend-dot" style="background:${PALETTE.red}"></span>math</span>
             <span><span class="legend-dot" style="background:transparent;border:1.5px dashed ${PALETTE.green};"></span>suggested</span>
           </div>
-          <button id="flyBtn" class="fly-btn">🚀 fly</button>
+          <button id="flyBtn" class="fly-btn">${ICONS.rocket} fly</button>
           <div class="dim-toggle">
             <button id="dim3dBtn" class="on">3D</button>
             <button id="dim2dBtn">2D</button>
@@ -957,7 +988,7 @@ function renderSketches() {
       ${list.map((s) => `
         <a class="sketch-tile" href="${sketchHref(s.id)}">
           ${s.svg ? `<div class="xd-thumb">${s.svg}</div>` : sketchSvg(s.id, 200, 70)}
-          <div class="st-title">${s.svg ? "✏️ " : ""}${escapeHtml(s.title)}</div>
+          <div class="st-title">${s.svg ? ICONS.pencil + " " : ""}${escapeHtml(s.title)}</div>
         </a>`).join("")}
     </div>
   `;
@@ -997,7 +1028,7 @@ function renderMissing(key) {
   $view.innerHTML = `
     <div class="crumbs"><a href="#/">garden</a><span class="sep">/</span>not yet written</div>
     <div class="stub-box">
-      <h2>🌱 “${escapeHtml(m ? m.label : key)}” hasn't been written yet</h2>
+      <h2>${ICONS.seed} “${escapeHtml(m ? m.label : key)}” hasn't been written yet</h2>
       <p style="line-height:1.7;">This is a placeholder for a note that's referenced but doesn't
         exist in the garden yet — a to-do left behind by a wikilink. Nothing lost, just not planted.</p>
       <div class="conn-group" style="margin-top:20px;">
@@ -1076,7 +1107,7 @@ function renderNote(id) {
 }
 
 function renderNotFound() {
-  $view.innerHTML = `<div class="notfound"><h2>🍂 nothing here</h2><p><a href="#/">back to the garden</a></p></div>`;
+  $view.innerHTML = `<div class="notfound"><h2>${ICONS.leaf} nothing here</h2><p><a href="#/">back to the garden</a></p></div>`;
 }
 
 // ---------------------------------------------------------------------------
