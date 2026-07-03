@@ -445,6 +445,7 @@ function renderGraph(svgEl, graphData, opts) {
 let garden3D = null;
 function destroyGarden3D() {
   if (!garden3D) return;
+  if (game) endGame(false);
   try {
     if (typeof garden3D._destructor === "function") garden3D._destructor();
     else garden3D.pauseAnimation();
@@ -469,6 +470,313 @@ function render3DGraph(container, graphData) {
     .onNodeClick((d) => { location.hash = noteHref(d.id); })
     .graphData(graphData);
   garden3D.cameraPosition({ z: 320 });
+}
+
+// ---------------------------------------------------------------------------
+// Garden Flyer — pilot a low-poly ship through the 3D garden. Every note
+// sphere and connection line is solid: touch one and you crash. three.js is
+// lazy-loaded the first time the game starts.
+// ---------------------------------------------------------------------------
+let game = null;
+
+function nodeHitRadius(d) {
+  // mirror of three-forcegraph's drawn size: nodeRelSize(4) * cbrt(nodeVal)
+  return 4 * Math.cbrt(1 + Math.min(d.degree, 10) * 0.7);
+}
+
+function segDist2(p, a, b) {
+  const abx = b.x - a.x, aby = b.y - a.y, abz = b.z - a.z;
+  const apx = p.x - a.x, apy = p.y - a.y, apz = p.z - a.z;
+  const len2 = abx * abx + aby * aby + abz * abz || 1e-9;
+  let t = (apx * abx + apy * aby + apz * abz) / len2;
+  t = Math.max(0, Math.min(1, t));
+  const dx = apx - abx * t, dy = apy - aby * t, dz = apz - abz * t;
+  return dx * dx + dy * dy + dz * dz;
+}
+
+function buildShip(THREE) {
+  const ship = new THREE.Group();
+  const hull = new THREE.Group(); // banks (rolls) inside the steering group
+  const mat = (c) => new THREE.MeshLambertMaterial({ color: c, flatShading: true });
+
+  const body = new THREE.Mesh(new THREE.ConeGeometry(2.2, 9, 6), mat(0xc25b41));
+  body.rotation.x = -Math.PI / 2; // nose forward (-Z)
+  hull.add(body);
+
+  const cockpit = new THREE.Mesh(new THREE.IcosahedronGeometry(1.3, 0), mat(0xd9a95f));
+  cockpit.position.set(0, 1.1, 0.4);
+  hull.add(cockpit);
+
+  const wingGeo = new THREE.BoxGeometry(6.5, 0.4, 2.6);
+  const wingL = new THREE.Mesh(wingGeo, mat(0x4f9d7d));
+  wingL.position.set(-3.6, -0.3, 2.2);
+  wingL.rotation.z = 0.18;
+  hull.add(wingL);
+  const wingR = new THREE.Mesh(wingGeo, mat(0x4f9d7d));
+  wingR.position.set(3.6, -0.3, 2.2);
+  wingR.rotation.z = -0.18;
+  hull.add(wingR);
+
+  const fin = new THREE.Mesh(new THREE.BoxGeometry(0.4, 2.6, 2.2), mat(0x35755b));
+  fin.position.set(0, 1.6, 3);
+  hull.add(fin);
+
+  const glow = new THREE.Mesh(
+    new THREE.ConeGeometry(1.1, 3.2, 5),
+    new THREE.MeshBasicMaterial({ color: 0xedd6a8, transparent: true, opacity: 0.9 })
+  );
+  glow.rotation.x = Math.PI / 2; // points backwards
+  glow.position.set(0, 0, 5.6);
+  hull.add(glow);
+
+  ship.add(hull);
+  ship.userData.hull = hull;
+  ship.userData.glow = glow;
+  return ship;
+}
+
+function flyerHudHtml() {
+  return `
+    <div class="fh-top">
+      <span class="fh-chip" id="fhTime">0.0s</span>
+      <span class="fh-chip" id="fhBest"></span>
+    </div>
+    <div class="fh-hint">&larr;&rarr; steer &middot; &uarr;&darr; pitch &middot; shift boost &middot; space brake &middot; esc land</div>
+    <div class="fh-ready" id="fhReady">🚀 engines on — go!</div>`;
+}
+
+async function startGame() {
+  if (game || !garden3D) return;
+  const graphAtStart = garden3D;
+  let THREE;
+  try {
+    document.getElementById("flyBtn")?.setAttribute("disabled", "");
+    THREE = window.__THREE
+      || (window.__THREE = await import("https://cdn.jsdelivr.net/npm/three@0.172.0/build/three.module.js"));
+  } catch (e) {
+    console.warn("Garden Flyer: couldn't load three.js", e);
+    const b = document.getElementById("flyBtn");
+    if (b) { b.removeAttribute("disabled"); b.textContent = "🚀 fly (offline?)"; }
+    return;
+  }
+  // the route (and with it the graph) may have changed while three.js loaded
+  if (game || !garden3D || garden3D !== graphAtStart) {
+    document.getElementById("flyBtn")?.removeAttribute("disabled");
+    return;
+  }
+  const btn = document.getElementById("flyBtn");
+  if (btn) { btn.removeAttribute("disabled"); btn.textContent = "🛬 land"; }
+
+  const scene = garden3D.scene();
+  const camera = garden3D.camera();
+  const stage = document.getElementById("graph3d");
+  const panel = document.querySelector(".graph-panel");
+
+  garden3D.controls().enabled = false;
+  garden3D.enablePointerInteraction(false);
+  if (panel) {
+    panel.classList.add("playing");
+    garden3D.width(stage.clientWidth).height(stage.clientHeight);
+  }
+
+  const hud = document.createElement("div");
+  hud.className = "fly-hud";
+  hud.innerHTML = flyerHudHtml();
+  stage.parentElement.appendChild(hud);
+
+  const ship = buildShip(THREE);
+  scene.add(ship);
+
+  game = {
+    THREE, ship, hud, camera, panel,
+    savedCam: { pos: camera.position.clone(), quat: camera.quaternion.clone() },
+    pos: new THREE.Vector3(0, 30, 420),
+    quat: new THREE.Quaternion(),
+    speed: 60, bank: 0, keys: {},
+    t0: performance.now(), prev: performance.now(),
+    crashed: false, shards: [], raf: 0,
+    best: Number(localStorage.getItem("gardenFlyerBest") || 0),
+  };
+  const bestEl = document.getElementById("fhBest");
+  if (bestEl && game.best) bestEl.textContent = `best ${game.best.toFixed(1)}s`;
+  setTimeout(() => document.getElementById("fhReady")?.classList.add("gone"), 1600);
+
+  game.onKey = (e) => {
+    const codes = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "KeyA", "KeyD", "KeyW", "KeyS", "Space", "ShiftLeft", "ShiftRight", "KeyR", "Escape"];
+    if (!codes.includes(e.code)) return;
+    e.preventDefault();
+    game.keys[e.code] = e.type === "keydown";
+    if (e.type === "keydown" && e.code === "Escape") endGame();
+    else if (e.type === "keydown" && e.code === "KeyR" && game.crashed) restartFlight();
+  };
+  window.addEventListener("keydown", game.onKey);
+  window.addEventListener("keyup", game.onKey);
+
+  game.raf = requestAnimationFrame(flightTick);
+}
+
+function restartFlight() {
+  const g = game;
+  if (!g) return;
+  g.hud.querySelector(".fly-crash")?.remove();
+  g.shards.forEach((s) => s.mesh.parent && s.mesh.parent.remove(s.mesh));
+  g.shards = [];
+  g.pos.set(0, 30, 420);
+  g.quat.identity();
+  g.speed = 60; g.bank = 0;
+  g.crashed = false;
+  g.t0 = performance.now();
+  g.ship.visible = true;
+  const ready = document.getElementById("fhReady");
+  if (ready) { ready.classList.remove("gone"); setTimeout(() => ready.classList.add("gone"), 1600); }
+}
+
+function crashFlight(cause) {
+  const g = game;
+  const T = g.THREE;
+  g.crashed = true;
+  const survived = (performance.now() - g.t0) / 1000;
+  if (survived > g.best) {
+    g.best = survived;
+    localStorage.setItem("gardenFlyerBest", String(survived.toFixed(1)));
+  }
+  g.ship.visible = false;
+  for (let i = 0; i < 18; i++) { // low-poly debris
+    const mesh = new T.Mesh(
+      new T.TetrahedronGeometry(0.5 + Math.random() * 1.1),
+      new T.MeshLambertMaterial({ color: [0xc25b41, 0x4f9d7d, 0xd9a95f][i % 3], flatShading: true, transparent: true })
+    );
+    mesh.position.copy(g.pos);
+    g.ship.parent.add(mesh);
+    g.shards.push({
+      mesh,
+      vel: new T.Vector3((Math.random() - 0.5) * 60, (Math.random() - 0.5) * 60, (Math.random() - 0.5) * 60),
+      spin: new T.Vector3(Math.random() * 6, Math.random() * 6, Math.random() * 6),
+      life: 1.4,
+    });
+  }
+  const flash = document.createElement("div");
+  flash.className = "fly-flash";
+  g.hud.appendChild(flash);
+  setTimeout(() => flash.remove(), 600);
+
+  setTimeout(() => {
+    if (!game || !game.crashed) return;
+    const card = document.createElement("div");
+    card.className = "fly-crash";
+    card.innerHTML = `
+      <h4>💥 ${escapeHtml(cause)}</h4>
+      <p>you survived <b>${survived.toFixed(1)}s</b>${g.best ? ` &middot; best ${g.best.toFixed(1)}s` : ""}</p>
+      <div class="fc-actions">
+        <button class="btn btn-primary" id="fcAgain">fly again <span class="kbd">R</span></button>
+        <button class="btn btn-ghost" id="fcLand">land <span class="kbd">esc</span></button>
+      </div>`;
+    g.hud.appendChild(card);
+    document.getElementById("fcAgain").addEventListener("click", restartFlight);
+    document.getElementById("fcLand").addEventListener("click", () => endGame());
+  }, 650);
+}
+
+function flightTick(now) {
+  const g = game;
+  if (!g) return;
+  g.raf = requestAnimationFrame(flightTick);
+  const T = g.THREE;
+  const dt = Math.min((now - g.prev) / 1000, 0.05);
+  g.prev = now;
+
+  if (g.crashed) { // debris only
+    g.shards.forEach((s) => {
+      s.life -= dt;
+      s.mesh.position.addScaledVector(s.vel, dt);
+      s.mesh.rotation.x += s.spin.x * dt;
+      s.mesh.rotation.y += s.spin.y * dt;
+      s.mesh.material.opacity = Math.max(0, s.life / 1.4);
+      if (s.life <= 0 && s.mesh.parent) s.mesh.parent.remove(s.mesh);
+    });
+    g.shards = g.shards.filter((s) => s.life > 0);
+    return;
+  }
+
+  const k = (c) => !!g.keys[c];
+  const yaw = (k("ArrowLeft") || k("KeyA") ? 1 : 0) - (k("ArrowRight") || k("KeyD") ? 1 : 0);
+  const pitch = (k("ArrowUp") || k("KeyW") ? 1 : 0) - (k("ArrowDown") || k("KeyS") ? 1 : 0);
+  const boost = k("ShiftLeft") || k("ShiftRight");
+  const target = k("Space") ? 24 : boost ? 125 : 62;
+  g.speed += (target - g.speed) * Math.min(1, dt * 3);
+
+  g.quat.multiply(new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), yaw * 1.7 * dt));
+  g.quat.multiply(new T.Quaternion().setFromAxisAngle(new T.Vector3(1, 0, 0), pitch * 1.25 * dt));
+
+  // soft wall: past the garden's edge, ease the nose back toward the middle
+  if (g.pos.length() > 720) {
+    const home = new T.Matrix4().lookAt(g.pos, new T.Vector3(0, 0, 0), new T.Vector3(0, 1, 0));
+    g.quat.slerp(new T.Quaternion().setFromRotationMatrix(home), Math.min(1, dt * 1.2));
+  }
+
+  const fwd = new T.Vector3(0, 0, -1).applyQuaternion(g.quat);
+  g.pos.addScaledVector(fwd, g.speed * dt);
+
+  g.ship.position.copy(g.pos);
+  g.bank += (yaw * -0.65 - g.bank) * Math.min(1, dt * 6);
+  g.ship.quaternion.copy(g.quat)
+    .multiply(new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 0, 1), g.bank));
+  const glow = g.ship.userData.glow;
+  glow.scale.setScalar(1 + Math.random() * 0.25 + (boost ? 0.7 : 0));
+
+  const camOff = new T.Vector3(0, 6, 22).applyQuaternion(g.ship.quaternion);
+  g.camera.position.lerp(g.pos.clone().add(camOff), 1 - Math.pow(0.0001, dt));
+  g.camera.up.copy(new T.Vector3(0, 1, 0).applyQuaternion(g.ship.quaternion));
+  g.camera.lookAt(g.pos.clone().addScaledVector(fwd, 14));
+
+  const elapsed = (now - g.t0) / 1000;
+  const timeEl = document.getElementById("fhTime");
+  if (timeEl) timeEl.textContent = `${elapsed.toFixed(1)}s${boost ? " 🔥" : ""}`;
+
+  if (elapsed > 1.4) { // spawn grace, then everything is solid
+    const { nodes, links } = garden3D.graphData();
+    for (const n of nodes) {
+      const r = nodeHitRadius(n) + 2.4;
+      const dx = g.pos.x - n.x, dy = g.pos.y - n.y, dz = g.pos.z - n.z;
+      if (dx * dx + dy * dy + dz * dz < r * r) {
+        return crashFlight(`you crashed into “${n.title}”`);
+      }
+    }
+    for (const l of links) {
+      if (typeof l.source !== "object" || typeof l.target !== "object") continue;
+      if (segDist2(g.pos, l.source, l.target) < 2.8 * 2.8) {
+        const kind = l.kind === "suggested" ? "suggested connection" : "link";
+        return crashFlight(`you clipped the ${kind} between “${l.source.title}” and “${l.target.title}”`);
+      }
+    }
+  }
+}
+
+function endGame(restoreView = true) {
+  const g = game;
+  if (!g) return;
+  game = null;
+  cancelAnimationFrame(g.raf);
+  window.removeEventListener("keydown", g.onKey);
+  window.removeEventListener("keyup", g.onKey);
+  g.shards.forEach((s) => s.mesh.parent && s.mesh.parent.remove(s.mesh));
+  if (g.ship.parent) g.ship.parent.remove(g.ship);
+  g.hud.remove();
+  const btn = document.getElementById("flyBtn");
+  if (btn) btn.textContent = "🚀 fly";
+  if (g.panel) g.panel.classList.remove("playing");
+  if (restoreView && garden3D) {
+    const stage = document.getElementById("graph3d");
+    if (stage) garden3D.width(stage.clientWidth).height(stage.clientHeight);
+    g.camera.up.set(0, 1, 0);
+    garden3D.controls().enabled = true;
+    garden3D.enablePointerInteraction(true);
+    garden3D.cameraPosition(
+      { x: g.savedCam.pos.x, y: g.savedCam.pos.y, z: g.savedCam.pos.z },
+      { x: 0, y: 0, z: 0 },
+      900
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -542,6 +850,7 @@ function renderHome() {
             <span><span class="legend-dot" style="background:${PALETTE.red}"></span>math</span>
             <span><span class="legend-dot" style="background:transparent;border:1.5px dashed ${PALETTE.green};"></span>suggested</span>
           </div>
+          <button id="flyBtn" class="fly-btn">🚀 fly</button>
           <div class="dim-toggle">
             <button id="dim3dBtn" class="on">3D</button>
             <button id="dim2dBtn">2D</button>
@@ -570,15 +879,18 @@ function renderHome() {
   const btn2d = document.getElementById("dim2dBtn");
   let rendered2d = false;
 
+  const flyBtn = document.getElementById("flyBtn");
   function show3D() {
     btn3d.classList.add("on"); btn2d.classList.remove("on");
     stage2d.style.display = "none"; stage3d.style.display = "block";
+    flyBtn.style.display = "";
     document.getElementById("graphHint").textContent = "drag to orbit · scroll to zoom · click a note to visit it";
     if (!garden3D) render3DGraph(stage3d, buildGraphData(null));
   }
   function show2D() {
     btn2d.classList.add("on"); btn3d.classList.remove("on");
     stage3d.style.display = "none"; stage2d.style.display = "block";
+    flyBtn.style.display = "none";
     document.getElementById("graphHint").textContent = "drag nodes · scroll to zoom · click a note to visit it";
     destroyGarden3D();
     stage3d.innerHTML = "";
@@ -589,6 +901,7 @@ function renderHome() {
   }
   btn3d.addEventListener("click", show3D);
   btn2d.addEventListener("click", show2D);
+  flyBtn.addEventListener("click", () => (game ? endGame() : startGame()));
 
   // setTimeout, not requestAnimationFrame: rAF never fires in hidden tabs,
   // which would leave the garden blank until the tab regains focus.
