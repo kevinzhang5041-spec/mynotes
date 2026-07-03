@@ -1,10 +1,13 @@
 /* ---------------------------------------------------------------------------
    Matisse garden — palette lifted from "The Terrace, Saint-Tropez" (1904):
-   pale sky, seafoam-green shutters, terracotta-rose terrace, deep pine
-   foliage, coral blossoms, all on sun-bleached cream.
+   seafoam-green shutters, terracotta-rose terrace, deep pine foliage,
+   coral blossoms — all set against the painting's pale sky blues.
 --------------------------------------------------------------------------- */
 :root {
-  --cream: #f2eee0;
+  --bg: #c9ddee;            /* the painting's sky — page background */
+  --bg-high: #d9e8f4;       /* sky near the horizon, top of the gradient */
+  --bg-deep: #b3cce2;
+  --cream: #f2eee0;         /* kept as ivory ink on the pine sidebar */
   --cream-deep: #e7dfc9;
   --white: #fbf9f0;
   --ink: #24403a;
@@ -46,13 +49,13 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  background: var(--cream);
+  background: var(--bg);
 }
 
 body {
   font-family: var(--font-body);
   color: var(--ink);
-  background: var(--cream);
+  background: linear-gradient(180deg, var(--bg-high) 0%, var(--bg) 55%, var(--bg-deep) 100%) fixed;
   min-height: 100vh;
 }
 
@@ -61,7 +64,7 @@ a { color: inherit; }
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--cream-deep); border-radius: 6px; border: 2px solid var(--cream); }
+::-webkit-scrollbar-thumb { background: var(--bg-deep); border-radius: 6px; border: 2px solid var(--bg); }
 ::-webkit-scrollbar-thumb:hover { background: var(--yellow); }
 .sidebar::-webkit-scrollbar-thumb { background: var(--pine-light); border-color: var(--pine); }
 
@@ -152,7 +155,7 @@ a { color: inherit; }
   cursor: pointer;
   font-size: 13px;
 }
-.search-item:hover, .search-item.active { background: var(--cream-deep); }
+.search-item:hover, .search-item.active { background: var(--tint-blue); }
 .search-item .sr-title { color: var(--ink); font-weight: 500; }
 .search-item .sr-path { color: var(--ink-faint); font-size: 11.5px; }
 .search-empty { padding: 14px 10px; color: var(--ink-faint); font-size: 13px; }
@@ -357,7 +360,7 @@ a { color: inherit; }
 .legend-dot { width: 9px; height: 9px; border-radius: var(--radius-blob); display: inline-block; margin-right: 5px; }
 .dim-toggle {
   display: inline-flex;
-  background: var(--cream-deep);
+  background: var(--bg-deep);
   border-radius: 999px;
   padding: 3px;
 }
@@ -480,10 +483,10 @@ a { color: inherit; }
 .note-body li { margin-bottom: 6px; }
 .note-body li.task-list-item { list-style: none; margin-left: -24px; }
 .note-body strong { color: var(--red-deep); }
-.note-body hr { border: none; border-top: 2px solid var(--cream-deep); margin: 26px 0; }
+.note-body hr { border: none; border-top: 2px solid var(--bg-deep); margin: 26px 0; }
 .note-body code {
   font-family: var(--font-mono);
-  background: var(--cream-deep);
+  background: var(--bg-deep);
   border-radius: 6px;
   padding: 2px 6px;
   font-size: 0.88em;
@@ -573,7 +576,7 @@ a { color: inherit; }
 .conn-pill {
   display: flex; align-items: center; gap: 8px;
   padding: 8px 12px;
-  background: var(--cream);
+  background: var(--tint-blue);
   border: 1.5px solid transparent;
   border-radius: 10px;
   text-decoration: none;
