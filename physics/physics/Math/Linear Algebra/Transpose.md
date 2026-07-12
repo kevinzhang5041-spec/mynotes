@@ -1,4 +1,3 @@
-
 The **transpose** of a matrix is obtained by swapping its rows and columns.
 
 If

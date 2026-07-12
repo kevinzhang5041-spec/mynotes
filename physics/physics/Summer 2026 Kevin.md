@@ -74,35 +74,45 @@ Linear Algebra
 - [ ] Chapter 9
 ###### 3 Real Analysis
 
-- [ ] 3.1 Sequences and Series
+- [x] 3.1 Sequences and Series ✅ 2026-07-08
     
     - [x] 3.1.1 Search for a Pattern ✅ 2026-07-02
 	    - [ ] check 301 
         
-    - [ ] 3.1.2 Linear Recursive Sequences
+    - [x] 3.1.2 Linear Recursive Sequences ✅ 2026-07-03
 	    - [ ] 307 wrong?
-	    - [ ] redo 308
-    - [ ] 3.1.3 Limits of Sequences
+	    - [x] redo 308 ✅ 2026-07-03
+    - [x] 3.1.3 Limits of Sequences ✅ 2026-07-08
+	    - [ ] check 316
+	    - [ ] check 317 second sol
+    - [x] 3.1.4 More About Limits of Sequences ✅ 2026-07-07
+	    - [ ] check 343 
+	    - [x] do 346/347 ✅ 2026-07-06
+	    - [ ] redo 350/351
         
-    - [ ] 3.1.4 More About Limits of Sequences
+    - [x] 3.1.5 Series ✅ 2026-07-08
+	    - [ ] 356 wrong
         
-    - [ ] 3.1.5 Series
-        
-    - [ ] 3.1.6 Telescopic Series and Products
-        
+    - [x] 3.1.6 Telescopic Series and Products ✅ 2026-07-08
+	    - [ ] check 366 after roots of unity/complex
+	    - [ ] 374 first sol
+	        
 - [ ] 3.2 Continuity, Derivatives, and Integrals
     
-    - [ ] 3.2.1 Limits of Functions
+    - [x] 3.2.1 Limits of Functions ✅ 2026-07-09
         
-    - [ ] 3.2.2 Continuous Functions
+    - [x] 3.2.2 Continuous Functions ✅ 2026-07-09
+	    - [ ] check 392 and 393
         
-    - [ ] 3.2.3 The Intermediate Value Property
+    - [x] 3.2.3 The Intermediate Value Property ✅ 2026-07-10
         
-    - [ ] 3.2.4 Derivatives and Their Applications
+    - [x] 3.2.4 Derivatives and Their Applications ✅ 2026-07-11
+	    - [ ] check 412
         
-    - [ ] 3.2.5 The Mean Value Theorem
+    - [x] 3.2.5 The Mean Value Theorem ✅ 2026-07-11
+	    - [ ] check 424
         
-    - [ ] 3.2.6 Convex Functions
+    - [x] 3.2.6 Convex Functions ✅ 2026-07-12
         
     - [ ] 3.2.7 Indefinite Integrals
         
@@ -127,8 +137,6 @@ Linear Algebra
     - [ ] 3.4.1 Functional Equations
         
     - [ ] 3.4.2 Ordinary Differential Equations of the First Order
-        
-    - [ ] Contents ix
         
     - [ ] 3.4.3 Ordinary Differential Equations of Higher Order
         

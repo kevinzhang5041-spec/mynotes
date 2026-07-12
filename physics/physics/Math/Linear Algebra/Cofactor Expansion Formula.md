@@ -26,7 +26,7 @@ $$
 
 where:
 
-- $M_{ij}$ is the **minor**, i.e. the determinant of the matrix obtained by deleting row $i$ and column $j$
+- $M_{ij}$ is the **minor**, i.e. the [[determinant]] of the matrix obtained by deleting row $i$ and column $j$
     
 
 ---

@@ -1,0 +1,1 @@
+A closed and bounded interval of real numbers is compact.
