@@ -114,15 +114,17 @@ Linear Algebra
         
     - [x] 3.2.6 Convex Functions ✅ 2026-07-12
         
-    - [ ] 3.2.7 Indefinite Integrals
+    - [x] 3.2.7 Indefinite Integrals ✅ 2026-07-12
         
-    - [ ] 3.2.8 Definite Integrals
+    - [x] 3.2.8 Definite Integrals ✅ 2026-07-13
         
-    - [ ] 3.2.9 Riemann Sums
+    - [x] 3.2.9 Riemann Sums ✅ 2026-07-14
         
-    - [ ] 3.2.10 Inequalities for Integrals
+    - [x] 3.2.10 Inequalities for Integrals ✅ 2026-07-14
+	    - [ ] review 477 
         
     - [ ] 3.2.11 Taylor and Fourier Series
+	    - [ ] check 492 and the example
         
 - [ ] 3.3 Multivariable Differential and Integral Calculus
     

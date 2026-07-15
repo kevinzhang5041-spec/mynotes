@@ -18,7 +18,7 @@ An equilibrium point is defined as
 $$
 U'(x_0) = 0.
 $$
-Using this and taking the [[Taylor Series]] around the equilibrium point, we can deduce for small oscillations the system follows a [[Simple Harmonic Motion|Hooke's law type force]] with an angular frequency of 
+Using this and taking the [[Math/Taylor Series]] around the equilibrium point, we can deduce for small oscillations the system follows a [[Simple Harmonic Motion|Hooke's law type force]] with an angular frequency of 
 $$
 \omega = \sqrt{\frac{U''(x_0)}{m}}.
 $$
