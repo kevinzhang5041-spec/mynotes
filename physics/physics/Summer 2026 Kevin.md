@@ -123,8 +123,9 @@ Linear Algebra
     - [x] 3.2.10 Inequalities for Integrals ✅ 2026-07-14
 	    - [ ] review 477 
         
-    - [ ] 3.2.11 Taylor and Fourier Series
+    - [x] 3.2.11 Taylor and Fourier Series ✅ 2026-07-15
 	    - [ ] check 492 and the example
+	    - [ ] review 496 497
         
 - [ ] 3.3 Multivariable Differential and Integral Calculus
     
