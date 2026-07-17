@@ -66,7 +66,7 @@
 	    - [ ] check 932
 	    - [ ] check 935
 ### July 1-20
-Linear Algebra 
+###### Linear Algebra 
 - [ ] Chapter 5
 - [ ] Chapter 6
 - [ ] Chapter 7
@@ -97,7 +97,7 @@ Linear Algebra
 	    - [ ] check 366 after roots of unity/complex
 	    - [ ] 374 first sol
 	        
-- [ ] 3.2 Continuity, Derivatives, and Integrals
+- [x] 3.2 Continuity, Derivatives, and Integrals ✅ 2026-07-16
     
     - [x] 3.2.1 Limits of Functions ✅ 2026-07-09
         
@@ -129,9 +129,11 @@ Linear Algebra
         
 - [ ] 3.3 Multivariable Differential and Integral Calculus
     
-    - [ ] 3.3.1 Partial Derivatives and Their Applications
+    - [x] 3.3.1 Partial Derivatives and Their Applications ✅ 2026-07-16
+	    - [ ] review 507
+	    - [ ] review 509
         
-    - [ ] 3.3.2 Multivariable Integrals
+    - [x] 3.3.2 Multivariable Integrals ✅ 2026-07-17
         
     - [ ] 3.3.3 The Many Versions of Stokes’ Theorem
         
