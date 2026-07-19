@@ -32,16 +32,16 @@ Suppose
 
 Then
 
-# $$  
-\oint_C P,dx+Q,dy
-
-## \iint_D  
+$$  
+\oint_C P \ dx+Q \ dy
+=
+\iint_D  
 \left(  
 \frac{\partial Q}{\partial x}
-
+-
 \frac{\partial P}{\partial y}  
-\right)  
-,dA.  
+\right)  \
+dA.  
 $$
 
 The quantity
@@ -76,11 +76,11 @@ Suppose
 
 Then
 
-# $$  
+$$  
 \oint_C\mathbf F\cdot d\mathbf r
-
+=
 \iint_S  
-(\nabla\times\mathbf F)\cdot\mathbf n,dS.  
+(\nabla\times\mathbf F)\cdot\mathbf n \ dS.  
 $$
 
 **Interpretation**
@@ -114,19 +114,19 @@ Suppose
 
 Then
 
-# $$  
+$$  
 \iint_S  
-\mathbf F\cdot\mathbf n,dS
-
+\mathbf F\cdot\mathbf n \ dS
+=
 \iiint_V  
-\nabla\cdot\mathbf F,dV.  
+\nabla\cdot\mathbf F \ dV.  
 $$
 
 where
 
-# $$  
+$$  
 \nabla\cdot\mathbf F
-
+=
 \frac{\partial P}{\partial x}  
 +  
 \frac{\partial Q}{\partial y}  
@@ -169,9 +169,9 @@ $$
 
 we have
 
-# $$  
+$$  
 \nabla\times\mathbf F
-
+=
 \left(  
 0,  
 0,  
@@ -259,20 +259,20 @@ $$
 
 #### Summary
 
-# $$  
+$$  
 \boxed{  
 \text{Circulation around a boundary}
-
+=
 \text{Curl through the interior}  
 }  
 $$
 
 (Green and Stokes)
 
-# $$  
+$$  
 \boxed{  
 \text{Flux through a boundary}
-
+=
 \text{Divergence inside}  
 }  
 $$

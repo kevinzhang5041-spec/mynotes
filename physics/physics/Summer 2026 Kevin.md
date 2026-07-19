@@ -127,7 +127,7 @@
 	    - [ ] check 492 and the example
 	    - [ ] review 496 497
         
-- [ ] 3.3 Multivariable Differential and Integral Calculus
+- [x] 3.3 Multivariable Differential and Integral Calculus ✅ 2026-07-18
     
     - [x] 3.3.1 Partial Derivatives and Their Applications ✅ 2026-07-16
 	    - [ ] review 507
@@ -135,7 +135,8 @@
         
     - [x] 3.3.2 Multivariable Integrals ✅ 2026-07-17
         
-    - [ ] 3.3.3 The Many Versions of Stokes’ Theorem
+    - [x] 3.3.3 The Many Versions of Stokes’ Theorem ✅ 2026-07-18
+	    - [ ] review 533, 534, cauchys theorem
         
 - [ ] 3.4 Equations with Functions as Unknowns
     
