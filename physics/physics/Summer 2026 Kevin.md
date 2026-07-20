@@ -140,8 +140,8 @@
         
 - [ ] 3.4 Equations with Functions as Unknowns
     
-    - [ ] 3.4.1 Functional Equations
-        
+    - [x] 3.4.1 Functional Equations ✅ 2026-07-20
+	    - [ ] Review 550
     - [ ] 3.4.2 Ordinary Differential Equations of the First Order
         
     - [ ] 3.4.3 Ordinary Differential Equations of Higher Order
