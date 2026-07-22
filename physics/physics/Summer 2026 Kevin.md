@@ -138,16 +138,17 @@
     - [x] 3.3.3 The Many Versions of Stokes’ Theorem ✅ 2026-07-18
 	    - [ ] review 533, 534, cauchys theorem
         
-- [ ] 3.4 Equations with Functions as Unknowns
+- [x] 3.4 Equations with Functions as Unknowns ✅ 2026-07-22
     
     - [x] 3.4.1 Functional Equations ✅ 2026-07-20
 	    - [ ] Review 550
     - [x] 3.4.2 Ordinary Differential Equations of the First Order ✅ 2026-07-21
         
-    - [ ] 3.4.3 Ordinary Differential Equations of Higher Order
+    - [x] 3.4.3 Ordinary Differential Equations of Higher Order ✅ 2026-07-22
         
     - [ ] 3.4.4 Problems Solved with Techniques of Differential Equations
-        
+	    - [ ] review 572
+	    
 
 ###### 4 Geometry and Trigonometry
 
